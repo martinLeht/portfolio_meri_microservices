@@ -10,15 +10,21 @@ public class BlockItemDto {
 	
 	private Long orderNumber;
 	
+	private String fileName;
+	
+	private String urlLink;
+	
 	private List<TextFragmentDto> textFragments;
 	
 	public BlockItemDto() {}
 	
-	public BlockItemDto(Long id, String type, Long orderNumber, List<TextFragmentDto> textFragments) {
+	public BlockItemDto(Long id, String type, Long orderNumber, String fileName,String urlLink, List<TextFragmentDto> textFragments) {
 		super();
 		this.id = id;
 		this.type = type;
 		this.orderNumber = orderNumber;
+		this.fileName = fileName;
+		this.urlLink = urlLink;
 		this.textFragments = textFragments;
 	}
 
@@ -47,6 +53,22 @@ public class BlockItemDto {
 		this.orderNumber = orderNumber;
 	}
 
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public String getUrlLink() {
+		return urlLink;
+	}
+
+	public void setUrlLink(String urlLink) {
+		this.urlLink = urlLink;
+	}
+
 	public List<TextFragmentDto> getTextFragments() {
 		return textFragments;
 	}
@@ -57,8 +79,8 @@ public class BlockItemDto {
 
 	@Override
 	public String toString() {
-		return "BlockItemDto [id=" + id + ", type=" + type + ", orderNumber=" + orderNumber + ", textFragments="
-				+ textFragments + "]";
+		return "BlockItemDto [id=" + id + ", type=" + type + ", orderNumber=" + orderNumber + ", fileName=" + fileName
+				+ ", urlLink=" + urlLink + ", textFragments=" + textFragments + "]";
 	}
 	
 }

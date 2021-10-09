@@ -34,6 +34,7 @@ public class BlogPostMapper {
 		postDto.setTitle(post.getTitle());
 		postDto.setCreatedAt(dateTimeFormatter.format(post.getCreatedAt()));
 		postDto.setUpdatedAt(dateTimeFormatter.format(post.getUpdatedAt()));
+		postDto.setTag(convertTagToDto(post.getTag()));
 		
 		List<ContentBlockDto> contentBlockDtos = post.getContent().stream()
 				.map(this::convertContentBlockToDto)
@@ -71,6 +72,7 @@ public class BlogPostMapper {
 		tagDto.setId(tag.getId());
 		tagDto.setPostTitle(tag.getPostTitle());
 		tagDto.setPostIntro(tag.getPostIntro());
+		tagDto.setThumbnail(tag.getThumbnail());
 		tagDto.setCreatedAt(dateTimeFormatter.format(tag.getCreatedAt()));
 		
 		return tagDto;
@@ -86,6 +88,8 @@ public class BlogPostMapper {
 		blockItemDto.setType(blockItem.getType().getType());
 		blockItemDto.setOrderNumber(blockItem.getOrderNumber());
 		blockItemDto.setId(blockItem.getId());
+		blockItemDto.setFileName(blockItem.getFileName());
+		blockItemDto.setUrlLink(blockItem.getUrlLink());
 		
 		List<TextFragmentDto> textFragmentDtos = blockItem.getTextFragments().stream()
 				.map(this::convertTextFragmentToDto)
@@ -121,6 +125,7 @@ public class BlogPostMapper {
 		BlogPost post = new BlogPost();
 		post.setId(postDto.getId());
 		post.setTitle(postDto.getTitle());
+		post.setTag(convertTagDtoToEntity(postDto.getTag()));
 		
 		List<ContentBlock> contentBlocks = postDto.getContent().stream()
 				.map(this::convertContentBlockDtoToEntity)
@@ -139,6 +144,7 @@ public class BlogPostMapper {
 		tag.setId(tagDto.getId());
 		tag.setPostTitle(tagDto.getPostTitle());
 		tag.setPostIntro(tagDto.getPostIntro());
+		tag.setThumbnail(tagDto.getThumbnail());
 		
 		return tag;
 	}
@@ -183,6 +189,8 @@ public class BlogPostMapper {
 		blockItem.setId(blockItemDto.getId());
 		blockItem.setOrderNumber(blockItemDto.getOrderNumber());
 		blockItem.setId(blockItemDto.getId());
+		blockItem.setFileName(blockItemDto.getFileName());
+		blockItem.setUrlLink(blockItemDto.getUrlLink());
 		
 		Optional<BlockItemType> optItemType = resolveBlockItemType(blockItemDto.getType());
 		blockItem.setType(optItemType.orElseGet(() -> BlockItemType.TEXT_ITEM));

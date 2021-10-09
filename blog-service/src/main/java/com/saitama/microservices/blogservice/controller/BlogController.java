@@ -1,9 +1,9 @@
 package com.saitama.microservices.blogservice.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +24,7 @@ import com.saitama.microservices.blogservice.service.IBlogPostService;
 import com.saitama.microservices.blogservice.utils.BlogPostMapper;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/blog")
 public class BlogController {
 
 	
@@ -35,7 +35,7 @@ public class BlogController {
 	private BlogPostMapper blogPostMapper;
 	
 	
-	@GetMapping("/blog")
+	@GetMapping("/")
 	public List<BlogPostDto> getBlogPosts() {
 		List<BlogPost> posts = blogPostService.getBlogPosts();
 		List<BlogPostDto> postsDto = posts.stream()
@@ -46,14 +46,17 @@ public class BlogController {
 	}
 	
 	
-	@GetMapping("/blog/{id}")
+	@GetMapping("/{id}")
 	public BlogPostDto getBlogPost(@PathVariable Long id) {
 		BlogPost post = blogPostService.getBlogPostById(id);
 		
-		return blogPostMapper.convertBlogPostToDto(post);
+		BlogPostDto postDto = blogPostMapper.convertBlogPostToDto(post);
+		Collections.sort(postDto.getContent());
+		
+		return postDto;
 	}
 	
-	@GetMapping("/blog/tag")
+	@GetMapping("/tag")
 	public List<TagDto> getBlogTags() {
 		List<Tag> tags = blogPostService.getTags();
 		List<TagDto> tagDtos = tags.stream()
@@ -63,7 +66,17 @@ public class BlogController {
 		return tagDtos;
 	}
 	
-	@GetMapping("/blog/{id}/tag")
+	@GetMapping("/tag/latest")
+	public List<TagDto> getLatestBlogTags() {
+		List<Tag> tags = blogPostService.getLatestTags();
+		List<TagDto> tagDtos = tags.stream()
+				.map(blogPostMapper::convertTagToDto)
+				.collect(Collectors.toList());
+		
+		return tagDtos;
+	}
+	
+	@GetMapping("/{id}/tag")
 	public TagDto getBlogTag(@PathVariable Long id) {
 		Tag tag = blogPostService.getTagById(id);
 		
@@ -71,7 +84,7 @@ public class BlogController {
 	}
 	
 	
-	@PostMapping("/blog")
+	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BlogPostDto createBlogPost(@RequestBody BlogPostDto postDto) {
 		System.out.println(postDto);
@@ -83,16 +96,20 @@ public class BlogController {
 	}
 	
 	
-	@PutMapping("/blog/{id}")
+	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public BlogPostDto updateBlogPost(@PathVariable Long id, @RequestBody BlogPostDto postDto) {
 		BlogPost post = blogPostMapper.convertBlogPostDtoToEntity(postDto);
 		BlogPost updatedPost = blogPostService.updateBlogPost(id, post);
-		return blogPostMapper.convertBlogPostToDto(updatedPost);
+		
+		BlogPostDto updatedPostDto = blogPostMapper.convertBlogPostToDto(updatedPost);
+		Collections.sort(updatedPostDto.getContent());
+		
+		return updatedPostDto;
 	}
 	
 	
-	@DeleteMapping("/blog/{id}")
+	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteBlogPost(@PathVariable Long id) {
 		blogPostService.deleteBlogPostById(id);

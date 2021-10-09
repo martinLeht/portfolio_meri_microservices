@@ -23,17 +23,20 @@ public class BlogPostDto {
 	
 	private String updatedAt;
 	
+	private TagDto tag;
+	
 	
 	public BlogPostDto() {} 
 	
 	public BlogPostDto(Long id, String title, List<ContentBlockDto> content, String createdAt,
-			String updatedAt) {
+			String updatedAt, TagDto tag) {
 		super();
 		this.id = id;
 		this.title = title;
 		this.content = content;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
+		this.tag = tag;
 	}
 	
 
@@ -77,10 +80,18 @@ public class BlogPostDto {
 		this.updatedAt = updatedAt;
 	}
 
+	public TagDto getTag() {
+		return tag;
+	}
+
+	public void setTag(TagDto tag) {
+		this.tag = tag;
+	}
+
 	@Override
 	public String toString() {
 		return "BlogPostDto [id=" + id + ", title=" + title + ", content=" + content + ", createdAt="
-				+ createdAt + ", updatedAt=" + updatedAt + "]";
+				+ createdAt + ", updatedAt=" + updatedAt + ", tagDto=" + tag + "]";
 	}	
 	
 }

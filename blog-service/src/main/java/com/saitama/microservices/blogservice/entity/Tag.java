@@ -25,6 +25,9 @@ public class Tag {
 	@Column(name = "post_intro")
 	private String postIntro;
 	
+	@Column(name = "thumbnail", length = 1000)
+	private String thumbnail;
+	
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private Timestamp createdAt;
@@ -35,11 +38,12 @@ public class Tag {
 	
 	public Tag() { }
 
-	public Tag(Long id, String postTitle, String postIntro, Timestamp createdAt, BlogPost post) {
+	public Tag(Long id, String postTitle, String postIntro, String thumbnail, Timestamp createdAt, BlogPost post) {
 		super();
 		this.id = id;
 		this.postTitle = postTitle;
 		this.postIntro = postIntro;
+		this.thumbnail = thumbnail;
 		this.createdAt = createdAt;
 		this.post = post;
 	}
@@ -68,6 +72,14 @@ public class Tag {
 		this.postIntro = postIntro;
 	}
 
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
 	public Timestamp getCreatedAt() {
 		return createdAt;
 	}
@@ -93,6 +105,7 @@ public class Tag {
 		result = prime * result + ((post == null) ? 0 : post.hashCode());
 		result = prime * result + ((postIntro == null) ? 0 : postIntro.hashCode());
 		result = prime * result + ((postTitle == null) ? 0 : postTitle.hashCode());
+		result = prime * result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
 		return result;
 	}
 
@@ -130,13 +143,19 @@ public class Tag {
 				return false;
 		} else if (!postTitle.equals(other.postTitle))
 			return false;
+		if (thumbnail == null) {
+			if (other.thumbnail != null)
+				return false;
+		} else if (!thumbnail.equals(other.thumbnail))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Tag [id=" + id + ", postTitle=" + postTitle + ", postIntro=" + postIntro + ", createdAt=" + createdAt
-				+ "]";
+		return "Tag [id=" + id + ", postTitle=" + postTitle + ", postIntro=" + postIntro + ", thumbnail=" + thumbnail
+				+ ", createdAt=" + createdAt + "]";
 	}
+	
 	
 }

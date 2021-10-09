@@ -7,7 +7,9 @@ public enum BlockType {
 	HEADING_TWO("heading-two"),
 	BLOCK_QUOTE("block-quote"),
 	NUMBERED_LIST("numbered-list"),
-	BULLETED_LIST("bulleted-list");
+	BULLETED_LIST("bulleted-list"),
+	LINK("link"),
+	IMAGE("image");
 	
 	private String type;
 	

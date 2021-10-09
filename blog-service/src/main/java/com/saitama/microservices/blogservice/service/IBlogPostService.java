@@ -7,13 +7,14 @@ import com.saitama.microservices.blogservice.entity.BlogPost;
 import com.saitama.microservices.blogservice.entity.Tag;
 
 public interface IBlogPostService {
-
 	
 	public List<BlogPost> getBlogPosts();
 	
 	public BlogPost getBlogPostById(Long id);
 	
 	public List<Tag> getTags();
+	
+	public List<Tag> getLatestTags();
 	
 	public Tag getTagById(Long id);
 	

@@ -2,7 +2,7 @@ package com.saitama.microservices.blogservice.dto;
 
 import java.util.List;
 
-public class ContentBlockDto {
+public class ContentBlockDto implements Comparable<ContentBlockDto>{
 
 	private Long id;
 	
@@ -58,6 +58,14 @@ public class ContentBlockDto {
 
 	public List<BlockItemDto> getBlockItems() {
 		return blockItems;
+	}
+	
+	@Override
+	public int compareTo(ContentBlockDto o) {
+		if (orderNumber == null || o.getOrderNumber() == null) {
+		      return 0;
+	    }
+	    return orderNumber.compareTo(o.getOrderNumber());
 	}
 
 	@Override
