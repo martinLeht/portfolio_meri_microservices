@@ -1,4 +1,4 @@
-package com.saitama.microservices.authenticationservice.error;
+package com.saitama.microservices.authenticationservice.exception;
 
 public class UserNotFoundException extends RuntimeException {
 

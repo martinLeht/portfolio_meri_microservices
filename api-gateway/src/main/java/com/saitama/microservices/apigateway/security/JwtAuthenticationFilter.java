@@ -32,34 +32,24 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 	
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		LOG.info("----------IN FILTER---------");
 		ServerHttpRequest req = (ServerHttpRequest) exchange.getRequest();
 		
-		final List<String> apiEndpoints = List.of("/auth/register", "/auth/login", "/storage/upload", "/image-service/storage/delete/files");
+		// Open endpoints
+		final List<String> apiEndpoints = List.of("/auth/register", "/auth/login", "/auth/token/refresh");
 		
-		Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream().noneMatch(uri -> {
-			LOG.info("isApiSecured uri:");
-			LOG.info(uri);
-			return r.getURI().getPath().contains(uri);
-		});
+		Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream().noneMatch(uri -> r.getURI().getPath().contains(uri));
 		
-		LOG.info(Boolean.toString(apiEndpoints.stream().noneMatch(uri -> req.getURI().getPath().contains(uri))));
-		
-		LOG.info("URI:");
-		LOG.info(req.getURI().getPath().toString());
-		if (isApiSecured.test(req)) {
-			LOG.info("----------AFTER IS API SEC---------");
-			if (!req.getHeaders().containsKey("Authorization")) {
+		if (isApiSecured.test(req)) {			
+			if (!headerContainsAuthorizationToken(req)) {
 				ServerHttpResponse res = (ServerHttpResponse) exchange.getResponse();
 				res.setStatusCode(HttpStatus.UNAUTHORIZED);
 				
 				return res.setComplete();
 			}
 			
-			final String token = req.getHeaders().getOrEmpty("Authorization").get(0);
+			String token = this.extractTokenFromAuthorizationHeader(req);
 			
 			try {
-				LOG.info("VALIDATING TOKEN");
 				jwtUtil.validateJwt(token);
 			} catch(JwtTokenMalformedException | JwtTokenMissingException e) {
 				ServerHttpResponse res = exchange.getResponse();
@@ -71,9 +61,23 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 			Claims claims = jwtUtil.getClaims(token);
 			exchange.getRequest().mutate().header("id", String.valueOf(claims.get("id"))).build();
 		}
-		LOG.info("----------SUORAAN---------");
 		
 		return chain.filter(exchange);
+	}
+	
+	private boolean headerContainsAuthorizationToken(ServerHttpRequest req) {
+		if (!req.getHeaders().containsKey("Authorization")) {
+			return false;
+		}
+		
+		String authHeader = req.getHeaders().getOrEmpty("Authorization").get(0);
+		return authHeader != null && authHeader.startsWith("Bearer:");
+	}
+	
+	private String extractTokenFromAuthorizationHeader(ServerHttpRequest req) {
+		String authHeader = req.getHeaders().getOrEmpty("Authorization").get(0);
+		final String token = authHeader.substring(7);
+		return token;	
 	}
 
 }

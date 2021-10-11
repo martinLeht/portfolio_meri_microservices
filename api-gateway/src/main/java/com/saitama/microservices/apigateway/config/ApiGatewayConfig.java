@@ -16,20 +16,10 @@ public class ApiGatewayConfig {
 	
 	@Bean
 	public RouteLocator gatewayRouter(RouteLocatorBuilder routeBuilder) {
-		/*
 		return routeBuilder.routes()
-				.route("auth", 
-						pred -> pred.path("/auth/**").filters(f -> f.filter(authFilter)).uri("lb://auth"))
-				.route("blog", 
-						pred -> pred.path("/blog/**").filters(f -> f.filter(authFilter)).uri("lb://blog"))
-				.route("storage", 
-						pred -> pred.path("/storage/**").filters(f -> f.filter(authFilter)).uri("lb://storage"))
-				.build();
-		*/
-		return routeBuilder.routes()
-				.route(pred -> pred.path("/authentication-service/**").filters(f -> f.filter(authFilter)).uri("lb://authentication-serivce"))
-				.route(pred -> pred.path("/blog/**")/*.filters(f -> f.filter(authFilter))*/.uri("lb://blog"))
-				.route(pred -> pred.path("/image-service/**").filters(f -> f.filter(authFilter)).uri("lb://image-service"))
+				.route("authentication-service", pred -> pred.path("/auth/**").filters(f -> f.filter(authFilter)).uri("lb://authentication-service"))
+				.route("blog-service",pred -> pred.path("/blog/**").filters(f -> f.filter(authFilter)).uri("lb://blog-service"))
+				.route("image-service", pred -> pred.path("/storage/**").filters(f -> f.filter(authFilter)).uri("lb://image-service"))
 				.build();
 	}
 }

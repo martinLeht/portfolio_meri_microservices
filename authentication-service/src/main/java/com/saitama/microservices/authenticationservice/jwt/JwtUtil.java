@@ -1,5 +1,6 @@
 package com.saitama.microservices.authenticationservice.jwt;
 
+import java.time.Instant;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -9,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import com.saitama.microservices.authenticationservice.error.JwtTokenMalformedException;
-import com.saitama.microservices.authenticationservice.error.JwtTokenMissingException;
+import com.saitama.microservices.authenticationservice.exception.JwtTokenMalformedException;
+import com.saitama.microservices.authenticationservice.exception.JwtTokenMissingException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -78,5 +79,10 @@ public class JwtUtil {
 		} catch (IllegalArgumentException ex) {
 			throw new JwtTokenMissingException("JWT claims string is empty.");
 		}
+	}
+	
+	public Instant getTokenValidity() {
+		long tokenValidity = Long.parseLong(env.getProperty("jwt.token.validity"));
+		return Instant.now().plusMillis(tokenValidity);
 	}
  }

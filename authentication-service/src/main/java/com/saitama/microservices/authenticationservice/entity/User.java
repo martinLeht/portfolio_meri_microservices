@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -71,12 +72,14 @@ public class User implements UserDetails {
 	)
 	private Set<Role> authorities = new HashSet();
 	
+	@OneToOne(mappedBy = "user")
+	private JwtRefreshToken refreshToken;
 	
 	public User() { }
 	
 
 	public User(UUID id, String email, String username, String firstName, String lastName, String password,
-			Integer loginAttempts, boolean verified, Timestamp createdAt, Timestamp updatedAt, Set<Role> authorities) {
+			Integer loginAttempts, boolean verified, Timestamp createdAt, Timestamp updatedAt, Set<Role> authorities, JwtRefreshToken refreshToken) {
 		super();
 		this.id = id;
 		this.email = email;
@@ -89,6 +92,7 @@ public class User implements UserDetails {
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.authorities = authorities;
+		this.refreshToken = refreshToken;
 	}
 
 
@@ -178,11 +182,10 @@ public class User implements UserDetails {
 		}
 		this.authorities.add(authority);
 	}
-	
-	public void setAuthority(Set<Role> authorities) {
+
+	public void setAuthorities(Set<Role> authorities) {
 		this.authorities = authorities;
 	}
-
 
 	@Override
 	public Set<Role> getAuthorities() {
@@ -233,6 +236,15 @@ public class User implements UserDetails {
 		return verified;
 	}
 
+	public JwtRefreshToken getRefreshToken() {
+		return refreshToken;
+	}
+
+
+	public void setRefreshToken(JwtRefreshToken refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
 
 	@Override
 	public int hashCode() {
@@ -246,6 +258,7 @@ public class User implements UserDetails {
 		result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
 		result = prime * result + ((loginAttempts == null) ? 0 : loginAttempts.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((refreshToken == null) ? 0 : refreshToken.hashCode());
 		result = prime * result + ((updatedAt == null) ? 0 : updatedAt.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		result = prime * result + (verified ? 1231 : 1237);
@@ -302,6 +315,11 @@ public class User implements UserDetails {
 				return false;
 		} else if (!password.equals(other.password))
 			return false;
+		if (refreshToken == null) {
+			if (other.refreshToken != null)
+				return false;
+		} else if (!refreshToken.equals(other.refreshToken))
+			return false;
 		if (updatedAt == null) {
 			if (other.updatedAt != null)
 				return false;
@@ -323,9 +341,6 @@ public class User implements UserDetails {
 		return "User [id=" + id + ", email=" + email + ", username=" + username + ", firstName=" + firstName
 				+ ", lastName=" + lastName + ", password=" + password + ", loginAttempts=" + loginAttempts
 				+ ", verified=" + verified + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", authorities="
-				+ authorities + "]";
-	}
-
-
-	
+				+ authorities + ", refreshToken=" + refreshToken + "]";
+	}	
 }

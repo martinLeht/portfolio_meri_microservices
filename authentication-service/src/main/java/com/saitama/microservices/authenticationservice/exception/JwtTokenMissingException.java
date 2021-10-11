@@ -1,4 +1,4 @@
-package com.saitama.microservices.authenticationservice.error;
+package com.saitama.microservices.authenticationservice.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

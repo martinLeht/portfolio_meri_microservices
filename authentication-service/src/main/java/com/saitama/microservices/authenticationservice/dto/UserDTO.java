@@ -1,7 +1,6 @@
 package com.saitama.microservices.authenticationservice.dto;
 
 import java.sql.Timestamp;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 

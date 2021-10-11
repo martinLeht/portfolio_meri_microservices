@@ -16,10 +16,10 @@ import com.saitama.microservices.authenticationservice.dto.LoginDTO;
 import com.saitama.microservices.authenticationservice.dto.UserDTO;
 import com.saitama.microservices.authenticationservice.entity.Role;
 import com.saitama.microservices.authenticationservice.entity.User;
-import com.saitama.microservices.authenticationservice.error.AuthenticationException;
-import com.saitama.microservices.authenticationservice.error.RoleMissingException;
-import com.saitama.microservices.authenticationservice.error.UserExistsException;
-import com.saitama.microservices.authenticationservice.error.UserNotFoundException;
+import com.saitama.microservices.authenticationservice.exception.AuthenticationException;
+import com.saitama.microservices.authenticationservice.exception.RoleMissingException;
+import com.saitama.microservices.authenticationservice.exception.UserExistsException;
+import com.saitama.microservices.authenticationservice.exception.UserNotFoundException;
 import com.saitama.microservices.authenticationservice.repository.RoleRepository;
 import com.saitama.microservices.authenticationservice.repository.UserRepository;
 
