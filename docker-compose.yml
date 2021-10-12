@@ -1,0 +1,80 @@
+version: '3.7'
+
+services:
+  naming-server:
+    image: 'naming-server'
+    build:
+      context: ./eureka-naming-server
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - blog-platform-network
+
+  api-gateway:
+    image: 'api-gateway'
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - blog-platform-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      EUREKA.CLIENT.FETCHREGISTRY: "true"
+
+  authentication-service:
+    image: 'authentication-service'
+    build:
+      context: ./authentication-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8083:8083"
+    networks:
+      - blog-platform-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      EUREKA.CLIENT.FETCHREGISTRY: "true"
+    
+  image-service:
+    image: 'image-service'
+    build:
+      context: ./image-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8200:8200"
+    networks:
+      - blog-platform-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      EUREKA.CLIENT.FETCHREGISTRY: "true"
+
+  blog-service:
+    image: 'blog-service'
+    build:
+      context: ./blog-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - blog-platform-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      EUREKA.CLIENT.FETCHREGISTRY: "true"
+
+networks:
+  blog-platform-network:
