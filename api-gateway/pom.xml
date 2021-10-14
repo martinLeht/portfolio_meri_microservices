@@ -60,7 +60,7 @@
 			<version>0.9.1</version>
 		</dependency>
 		
-		
+		<!-- For Zipkin distributed tracing
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-sleuth</artifactId>
@@ -75,7 +75,7 @@
 			<groupId>org.springframework.amqp</groupId>
 			<artifactId>spring-rabbit</artifactId>
 		</dependency>
-		
+		-->
 		
 	</dependencies>
 	<dependencyManagement>
