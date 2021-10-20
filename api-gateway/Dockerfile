@@ -1,6 +1,8 @@
 # Java OpenJDK 11
 FROM adoptopenjdk:11-jre-hotspot as builder
 
+RUN mvn -f /home/app/pom.xml clean package
+
 # Maven build JAR name
 ARG JAR_FILE=target/api-gateway-0.0.1-SNAPSHOT.jar
 
