@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.saitama.microservices.apigateway.error.JwtTokenExpiredException;
 import com.saitama.microservices.apigateway.error.JwtTokenMalformedException;
 import com.saitama.microservices.apigateway.error.JwtTokenMissingException;
 
@@ -48,7 +49,7 @@ public class JwtUtil {
 		} catch (MalformedJwtException ex) {
 			throw new JwtTokenMalformedException("Invalid JWT token");
 		} catch (ExpiredJwtException ex) {
-			throw new JwtTokenMalformedException("Expired JWT token");
+			throw new JwtTokenExpiredException("Expired JWT token");
 		} catch (UnsupportedJwtException ex) {
 			throw new JwtTokenMalformedException("Unsupported JWT token");
 		} catch (IllegalArgumentException ex) {

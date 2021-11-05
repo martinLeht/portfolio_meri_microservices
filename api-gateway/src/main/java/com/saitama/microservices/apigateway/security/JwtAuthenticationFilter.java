@@ -14,6 +14,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
+import com.saitama.microservices.apigateway.error.JwtTokenExpiredException;
 import com.saitama.microservices.apigateway.error.JwtTokenMalformedException;
 import com.saitama.microservices.apigateway.error.JwtTokenMissingException;
 import com.saitama.microservices.apigateway.jwt.JwtUtil;
@@ -56,6 +57,11 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 				res.setStatusCode(HttpStatus.BAD_REQUEST);
 				
 				return res.setComplete();
+			} catch (JwtTokenExpiredException e) {
+				ServerHttpResponse res = exchange.getResponse();
+				res.setStatusCode(HttpStatus.UNAUTHORIZED);
+				
+				return res.setComplete();
 			}
 			
 			Claims claims = jwtUtil.getClaims(token);
@@ -71,7 +77,7 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 		}
 		
 		String authHeader = req.getHeaders().getOrEmpty("Authorization").get(0);
-		return authHeader != null && authHeader.startsWith("Bearer:");
+		return authHeader != null && authHeader.startsWith("Bearer");
 	}
 	
 	private String extractTokenFromAuthorizationHeader(ServerHttpRequest req) {
