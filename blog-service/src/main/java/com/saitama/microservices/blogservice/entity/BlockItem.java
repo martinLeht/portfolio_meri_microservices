@@ -40,7 +40,7 @@ public class BlockItem {
 	@Column(name ="url_link", length = 1000)
 	private String urlLink;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "blockItem", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "blockItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<TextFragment> textFragments = new ArrayList();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -105,6 +105,17 @@ public class BlockItem {
 	public void setContentBlock(ContentBlock contentBlock) {
 		this.contentBlock = contentBlock;
 	}
+	
+	
+	public void addTextFragment(TextFragment textFragment){
+		this.textFragments.add(textFragment);
+		textFragment.setBlockItem(this);
+    }
+	
+    public void removeTextFragment(TextFragment textFragment){
+    	this.textFragments.remove(textFragment);
+		textFragment.setBlockItem(null);
+    }
 
 	@Override
 	public int hashCode() {

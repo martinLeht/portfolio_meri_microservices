@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -35,12 +36,7 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		ServerHttpRequest req = (ServerHttpRequest) exchange.getRequest();
 		
-		// Open endpoints
-		final List<String> apiEndpoints = List.of("/auth/register", "/auth/login", "/auth/token/refresh");
-		
-		Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream().noneMatch(uri -> r.getURI().getPath().contains(uri));
-		
-		if (isApiSecured.test(req)) {			
+		if (RouteValidator.isSecureRoute(req)) {			
 			if (!headerContainsAuthorizationToken(req)) {
 				ServerHttpResponse res = (ServerHttpResponse) exchange.getResponse();
 				res.setStatusCode(HttpStatus.UNAUTHORIZED);

@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -14,15 +15,16 @@ import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "tag")
-public class Tag {
+public class Tag implements Comparable<Tag> {
 
 	@Id
+	@Column(name = "id")
 	private Long id;
 	
 	@Column(name = "post_title")
 	private String postTitle;
 	
-	@Column(name = "post_intro")
+	@Column(name = "post_intro", length = 1000)
 	private String postIntro;
 	
 	@Column(name = "thumbnail", length = 1000)
@@ -32,13 +34,15 @@ public class Tag {
 	@CreationTimestamp
 	private Timestamp createdAt;
 	
+	
 	@OneToOne(fetch = FetchType.LAZY)
 	@MapsId
+	@JoinColumn(name = "post_id")
 	private BlogPost post;
 	
 	public Tag() { }
 
-	public Tag(Long id, String postTitle, String postIntro, String thumbnail, Timestamp createdAt, BlogPost post) {
+	public Tag(Long id, String postTitle, String postIntro, String thumbnail, Timestamp createdAt , BlogPost post) {
 		super();
 		this.id = id;
 		this.postTitle = postTitle;
@@ -88,12 +92,19 @@ public class Tag {
 		this.createdAt = createdAt;
 	}
 
+	
 	public BlogPost getPost() {
 		return post;
 	}
 
 	public void setPost(BlogPost post) {
 		this.post = post;
+	}
+	
+	
+	@Override
+	public int compareTo(Tag tag) {
+		return createdAt.compareTo(tag.getCreatedAt());
 	}
 
 	@Override
@@ -102,7 +113,6 @@ public class Tag {
 		int result = 1;
 		result = prime * result + ((createdAt == null) ? 0 : createdAt.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((post == null) ? 0 : post.hashCode());
 		result = prime * result + ((postIntro == null) ? 0 : postIntro.hashCode());
 		result = prime * result + ((postTitle == null) ? 0 : postTitle.hashCode());
 		result = prime * result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
@@ -128,11 +138,6 @@ public class Tag {
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (post == null) {
-			if (other.post != null)
-				return false;
-		} else if (!post.equals(other.post))
-			return false;
 		if (postIntro == null) {
 			if (other.postIntro != null)
 				return false;
@@ -156,6 +161,5 @@ public class Tag {
 		return "Tag [id=" + id + ", postTitle=" + postTitle + ", postIntro=" + postIntro + ", thumbnail=" + thumbnail
 				+ ", createdAt=" + createdAt + "]";
 	}
-	
 	
 }

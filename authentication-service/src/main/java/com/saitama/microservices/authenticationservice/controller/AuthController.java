@@ -39,15 +39,14 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<JwtDTO> login(@RequestBody LoginDTO loginDto) {
 		User authenticatedUser = userService.authenticateUser(loginDto);
-		
 		if (authenticatedUser != null) {
+			jwtService.deleteByUser(authenticatedUser);
 			String accessToken = jwtService.getJwtToken(authenticatedUser.getId().toString());
 			JwtRefreshToken refreshToken = jwtService.getRefreshToken(authenticatedUser.getId().toString());
 			return new ResponseEntity<JwtDTO>(new JwtDTO(accessToken, refreshToken.getToken()), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<JwtDTO>(new JwtDTO(), HttpStatus.UNAUTHORIZED);
 		}
-		
 	}
 	
 	@PostMapping("/token/refresh")
@@ -66,11 +65,9 @@ public class AuthController {
 	
 	@PostMapping("/register")
 	public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDto) {
-		LOG.info("Päästiin sisään");
 		/* Save user */
 		User newUser = userService.registerUser(userDto);
 		newUser.setPassword(null);
-		System.out.println(newUser);
 		
 		UserDTO newUserDto = mapUserToDto(newUser);
 		return new ResponseEntity<UserDTO>(newUserDto, HttpStatus.OK);

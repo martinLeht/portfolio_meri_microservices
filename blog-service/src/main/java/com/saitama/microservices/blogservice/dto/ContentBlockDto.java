@@ -12,10 +12,6 @@ public class ContentBlockDto implements Comparable<ContentBlockDto>{
 	
 	private List<BlockItemDto> blockItems;
 	
-	/*
-	@JsonIgnore
-	private BlogPostDto post;
-	*/
 	
 	public ContentBlockDto() {}
 	

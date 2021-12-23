@@ -35,7 +35,7 @@ public class ContentBlock {
 	@Column(name ="order_number")
 	private Long orderNumber;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "contentBlock", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "contentBlock", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<BlockItem> blockItems = new ArrayList();
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -94,6 +94,16 @@ public class ContentBlock {
 		this.post = post;
 	}
 	
+	public void addBlockItem(BlockItem blockItem){
+		this.blockItems.add(blockItem);
+		blockItem.setContentBlock(this);
+    }
+	
+    public void removeBlockItem(BlockItem blockItem){
+    	this.blockItems.remove(blockItem);
+    	blockItem.setContentBlock(null);
+    }
+    
 	@Override
 	public int hashCode() {
 		final int prime = 31;

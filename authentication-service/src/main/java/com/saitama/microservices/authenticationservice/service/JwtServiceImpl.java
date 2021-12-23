@@ -45,7 +45,7 @@ public class JwtServiceImpl implements IJwtService {
 		}
 		
 		refreshToken.setUser(userOpt.get());
-		refreshToken.setExpiryDate(jwtUtil.getTokenValidity().plus(1, ChronoUnit.DAYS));
+		refreshToken.setExpiryDate(jwtUtil.getTokenValidity().plus(1, ChronoUnit.MINUTES));
 		refreshToken.setToken(UUID.randomUUID().toString());
 		
 		refreshToken = refreshTokenRepository.save(refreshToken);
@@ -77,6 +77,12 @@ public class JwtServiceImpl implements IJwtService {
 	@Override
 	public void deleteByUserId(String id) {
 		User user = userRepository.findById(UUID.fromString(id)).get();
+		this.refreshTokenRepository.deleteByUser(user);
+	}
+	
+	@Transactional
+	@Override
+	public void deleteByUser(User user) {
 		this.refreshTokenRepository.deleteByUser(user);
 	}
 

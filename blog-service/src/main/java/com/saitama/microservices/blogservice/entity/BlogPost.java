@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,11 +38,12 @@ public class BlogPost {
 	@UpdateTimestamp
 	private Timestamp updatedAt;
 	
-	@OneToOne(mappedBy="post", fetch = FetchType.LAZY, 
-			cascade = CascadeType.ALL, optional = false)
+	@OneToOne(mappedBy="post", 
+			cascade = CascadeType.ALL, optional = false, orphanRemoval = true)
+	@PrimaryKeyJoinColumn
 	private Tag tag;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ContentBlock> content = new ArrayList<>();
 	
 	
@@ -99,6 +101,7 @@ public class BlogPost {
 		this.updatedAt = updatedAt;
 	}
 
+	
 	public Tag getTag() {
 		return tag;
 	}
@@ -117,7 +120,16 @@ public class BlogPost {
 	public void setContent(List<ContentBlock> content) {
 		this.content = content;
 	}
-
+	
+	public void addContentBlock(ContentBlock contentBlock){
+		this.content.add(contentBlock);
+		contentBlock.setPost(this);
+    }
+	
+    public void removeContentBlock(ContentBlock contentBlock){
+    	this.content.remove(contentBlock);
+    	contentBlock.setPost(null);
+    }
 
 	@Override
 	public int hashCode() {
@@ -181,6 +193,5 @@ public class BlogPost {
 		return "BlogPost [id=" + id + ", title=" + title + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
 				+ ", tag=" + tag + ", content=" + content + "]";
 	}
-	
 	
 }

@@ -3,6 +3,7 @@ package com.saitama.microservices.authenticationservice.service;
 import java.util.Optional;
 
 import com.saitama.microservices.authenticationservice.entity.JwtRefreshToken;
+import com.saitama.microservices.authenticationservice.entity.User;
 
 public interface IJwtService {
 	
@@ -17,4 +18,6 @@ public interface IJwtService {
 	public JwtRefreshToken verifyRefreshTokenValidity(JwtRefreshToken token);
 	
 	public void deleteByUserId(String id);
+	
+	public void deleteByUser(User user);
 }

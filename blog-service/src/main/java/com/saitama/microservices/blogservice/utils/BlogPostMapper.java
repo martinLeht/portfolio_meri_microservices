@@ -1,7 +1,6 @@
 package com.saitama.microservices.blogservice.utils;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -125,12 +124,24 @@ public class BlogPostMapper {
 		BlogPost post = new BlogPost();
 		post.setId(postDto.getId());
 		post.setTitle(postDto.getTitle());
-		post.setTag(convertTagDtoToEntity(postDto.getTag()));
 		
+		Tag tag = this.convertTagDtoToEntity(postDto.getTag());
+		if (tag != null) {
+			tag.setPost(post);
+		}
+		post.setTag(tag);
+		
+		/*
 		List<ContentBlock> contentBlocks = postDto.getContent().stream()
 				.map(this::convertContentBlockDtoToEntity)
 				.collect(Collectors.toList());
 		post.setContent(contentBlocks);
+		*/
+		
+		for (ContentBlockDto blockDto :  postDto.getContent()) {
+			ContentBlock block = this.convertContentBlockDtoToEntity(blockDto);
+			post.addContentBlock(block);
+		}
 		
 		return post;
 	}
@@ -163,10 +174,17 @@ public class BlogPostMapper {
 		Optional<BlockType> optBlockType = resolveContentBlockType(contentBlockDto.getType());
 		contentBlock.setType(optBlockType.orElseGet(() -> BlockType.PARAGRAPH));
 		
+		/*
 		List<BlockItem> blockItems = contentBlockDto.getBlockItems().stream()
 				.map(this::convertBlockItemDtoToEntity)
+				.map(item -> contentBlock.addBlockItem(item))
 				.collect(Collectors.toList());
-		contentBlock.setBlockItems(blockItems);
+				*/
+		
+		for (BlockItemDto itemDto : contentBlockDto.getBlockItems()) {
+			BlockItem item = this.convertBlockItemDtoToEntity(itemDto);
+			contentBlock.addBlockItem(item);
+		}
 		
 		return contentBlock;
 	}
@@ -195,10 +213,10 @@ public class BlogPostMapper {
 		Optional<BlockItemType> optItemType = resolveBlockItemType(blockItemDto.getType());
 		blockItem.setType(optItemType.orElseGet(() -> BlockItemType.TEXT_ITEM));
 		
-		List<TextFragment> textFragments = blockItemDto.getTextFragments().stream()
-				.map(this::convertTextFragmentDtoToEntity)
-				.collect(Collectors.toList());
-		blockItem.setTextFragments(textFragments);
+		for (TextFragmentDto fragDto : blockItemDto.getTextFragments()) {
+			TextFragment frag = this.convertTextFragmentDtoToEntity(fragDto);
+			blockItem.addTextFragment(frag);
+		}
 		
 		return blockItem;
 	}

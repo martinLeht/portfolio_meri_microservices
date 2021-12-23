@@ -54,6 +54,18 @@ public class GoogleCloudStorageService implements IGoogleCloudStorageService {
 	private URL createSignedPathStyleUrl(BlobInfo blobInfo, int duration, TimeUnit timeUnit) {
 		return storage.signUrl(blobInfo, duration, timeUnit, Storage.SignUrlOption.withPathStyle());
 	}
+	
+	@Override
+	public Optional<URL> getFileByName(String name) throws IOException {
+		final BlobId blobId = constructBlobId(bucketName, subdirectory, name);
+		Blob blob = storage.get(blobId);
+		if (blob != null) {
+			BlobInfo info = BlobInfo.newBuilder(blobId).build();
+			URL url = createSignedPathStyleUrl(info, 7, TimeUnit.DAYS);
+			return Optional.of(url);
+		}
+		return Optional.empty();
+	}
 
 	/**
 	 * Construct Blob ID
