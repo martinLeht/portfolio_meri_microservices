@@ -2,72 +2,67 @@ package com.saitama.microservices.blogservice.dto;
 
 import java.util.List;
 
-public class ContentBlockDto implements Comparable<ContentBlockDto>{
 
-	private Long id;
+public class ContentBlockDto {
 	
 	private String type;
 	
-	private Long orderNumber;
+	private AttachmentDto attachment;
 	
-	private List<BlockItemDto> blockItems;
+	private List<TextFragmentDto> textContent;
 	
+	private List<ContentBlockDto> childNodes;
 	
+
 	public ContentBlockDto() {}
-	
-	public ContentBlockDto(Long id, String type, Long orderNumber, List<BlockItemDto> blockItems) {
-		super();
-		this.id = id;
+
+
+	public ContentBlockDto(String type, AttachmentDto attachment, List<TextFragmentDto> textContent, List<ContentBlockDto> childNodes) {
 		this.type = type;
-		this.orderNumber = orderNumber;
-		this.blockItems = blockItems;
-	}
-	
-
-	public Long getId() {
-		return id;
+		this.textContent = textContent;
+		this.childNodes = childNodes;
+		this.attachment = attachment;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getType() {
 		return type;
 	}
 
+
 	public void setType(String type) {
 		this.type = type;
 	}
 	
-	public Long getOrderNumber() {
-		return orderNumber;
+	
+	public AttachmentDto getAttachment() {
+		return attachment;
 	}
 
-	public void setOrderNumber(Long orderNumber) {
-		this.orderNumber = orderNumber;
-	}
-
-	public void setBlockItems(List<BlockItemDto> blockItems) {
-		this.blockItems = blockItems;
-	}
-
-	public List<BlockItemDto> getBlockItems() {
-		return blockItems;
+	
+	public void setAttachment(AttachmentDto attachment) {
+		this.attachment = attachment;
 	}
 	
-	@Override
-	public int compareTo(ContentBlockDto o) {
-		if (orderNumber == null || o.getOrderNumber() == null) {
-		      return 0;
-	    }
-	    return orderNumber.compareTo(o.getOrderNumber());
+	
+	public List<TextFragmentDto> getTextContent() {
+		return textContent;
 	}
 
-	@Override
-	public String toString() {
-		return "ContentBlockDto [id=" + id + ", type=" + type + ", orderNumber=" + orderNumber + ", blockItems="
-				+ blockItems + "]";
+
+	public void setTextContent(List<TextFragmentDto> textContent) {
+		this.textContent = textContent;
 	}
+
+
+	public List<ContentBlockDto> getChildNodes() {
+		return childNodes;
+	}
+
+
+	public void setChildNodes(List<ContentBlockDto> childNodes) {
+		this.childNodes = childNodes;
+	}
+		
 	
 }

@@ -22,9 +22,6 @@ public class JwtUtil {
 
 	
 	private static final Logger LOG = LoggerFactory.getLogger(JwtUtil.class.getName());
-
-//	@Value("${jwt.secret}")
-//	private String jwtSecret;
 	
 	@Autowired
 	private Environment env;
@@ -32,7 +29,6 @@ public class JwtUtil {
 	public Claims getClaims(final String token) {
 		try {
 			String jwtSecret = env.getProperty("jwt.secret");
-			LOG.info(jwtSecret);
 			Claims body = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
 			return body;
 		} catch (Exception e) {
@@ -44,7 +40,6 @@ public class JwtUtil {
 	public void validateJwt(final String token) throws JwtTokenMalformedException, JwtTokenMissingException  {
 		try {
 			String jwtSecret = env.getProperty("jwt.secret");
-			LOG.info(jwtSecret);
 			Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
 		} catch (MalformedJwtException ex) {
 			throw new JwtTokenMalformedException("Invalid JWT token");

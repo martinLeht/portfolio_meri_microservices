@@ -26,10 +26,8 @@ public class CorsConfiguration {
   @Bean
   public WebFilter corsFilter() {
     return (ServerWebExchange ctx, WebFilterChain chain) -> {
-    	System.out.println("IN CORS WEB FILTES");
       ServerHttpRequest request = ctx.getRequest();
       if (CorsUtils.isCorsRequest(request)) {
-    	  System.out.println("----- IS CORS -----");
         ServerHttpResponse response = ctx.getResponse();
         HttpHeaders headers = response.getHeaders();
         headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
@@ -37,12 +35,10 @@ public class CorsConfiguration {
         headers.add("Access-Control-Max-Age", MAX_AGE); //OPTION how long the results of a preflight request (that is the information contained in the Access-Control-Allow-Methods and Access-Control-Allow-Headers headers) can be cached. 
         headers.add("Access-Control-Allow-Headers",ALLOWED_HEADERS);
         if (request.getMethod() == HttpMethod.OPTIONS) {
-        	 System.out.println("----- OK -----");
           response.setStatusCode(HttpStatus.OK);
           return Mono.empty();
         }
       }
-      System.out.println("----- RETURNING CORS -----");
       return chain.filter(ctx);
     };
   }

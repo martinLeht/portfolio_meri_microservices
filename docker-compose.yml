@@ -2,10 +2,7 @@ version: '3.7'
 
 services:
   naming-server:
-    image: 'naming-server'
-    build:
-      context: ./eureka-naming-server
-      dockerfile: Dockerfile
+    image: 'eureka-naming-server:0.0.1-SNAPSHOT'
     mem_limit: 700m
     ports:
       - "8761:8761"
@@ -13,10 +10,7 @@ services:
       - blog-platform-network
 
   api-gateway:
-    image: 'api-gateway'
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+    image: 'api-gateway:0.0.1-SNAPSHOT'
     mem_limit: 700m
     ports:
       - "8765:8765"
@@ -29,26 +23,26 @@ services:
       EUREKA.CLIENT.FETCHREGISTRY: "true"
 
   authentication-service:
-    image: 'authentication-service'
-    build:
-      context: ./authentication-service
-      dockerfile: Dockerfile
+    image: 'authentication-service:0.0.1-SNAPSHOT'
     mem_limit: 700m
     ports:
       - "8083:8083"
     networks:
       - blog-platform-network
     depends_on:
+      - maria_db
       - naming-server
+    command: sh -c './wait-for maria_db:3306 -- npm start'
+    restart: on-failure
     environment:
       EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
       EUREKA.CLIENT.FETCHREGISTRY: "true"
+      SPRING_DATASOURCE_URL: jdbc:mariadb://maria_db:3306/portfolio_microservices_db
+      SPRING_DATASOURCE_USERNAME: portfolio_dev
+      SPRING_DATASOURCE_PASSWORD: Test!666
     
   image-service:
-    image: 'image-service'
-    build:
-      context: ./image-service
-      dockerfile: Dockerfile
+    image: 'image-service:0.0.1-SNAPSHOT'
     mem_limit: 700m
     ports:
       - "8200:8200"
@@ -61,10 +55,7 @@ services:
       EUREKA.CLIENT.FETCHREGISTRY: "true"
 
   blog-service:
-    image: 'blog-service'
-    build:
-      context: ./blog-service
-      dockerfile: Dockerfile
+    image: 'blog-service:0.0.1-SNAPSHOT'
     mem_limit: 700m
     ports:
       - "8100:8100"
@@ -75,6 +66,19 @@ services:
     environment:
       EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
       EUREKA.CLIENT.FETCHREGISTRY: "true"
+      
+  maria_db:
+    image: "mariadb:10.5.8"
+    restart: always
+    ports:
+      - 3307:3306
+    networks:
+      - blog-platform-network
+    environment:
+      MYSQL_DATABASE: portfolio_microservices_db
+      MYSQL_USER: portfolio_dev
+      MYSQL_PASSWORD: Test!666
+      MYSQL_ROOT_PASSWORD: Test666!
 
 networks:
   blog-platform-network:

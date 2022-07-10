@@ -22,58 +22,12 @@ public class ApiGatewayConfig {
 	@Bean
 	public RouteLocator gatewayRouter(RouteLocatorBuilder routeBuilder) {
 		return routeBuilder.routes()
-				.route("authentication-service", pred -> pred.path("/auth/**").filters(f -> f.filter(authFilter)).uri("lb://authentication-service"))
-				.route("blog-service",pred -> pred.path("/blog/**").filters(f -> f.filter(authFilter)).uri("lb://blog-service"))
-				.route("image-service", pred -> pred.path("/storage/**").filters(f -> f.filter(authFilter)).uri("lb://image-service"))
+				.route("authentication-service", pred -> pred.path("/auth/**").filters(f -> f.filter(authFilter))
+						.uri("http://authentication-service.authentication-service.svc.cluster.local:80"))
+				.route("blog-service", pred -> pred.path("/blog/**").filters(f -> f.filter(authFilter))
+						.uri("http://blog-service.blog-service.svc.cluster.local:80"))
+				.route("image-service", pred -> pred.path("/storage/**").filters(f -> f.filter(authFilter))
+						.uri("http://storage-service.storage-service.svc.cluster.local:80"))
 				.build();
 	}
-	
-	/*
-	@Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedHeaders("*")
-                .allowedMethods(ALLOWED_METHODS);
-    }
-
-    @Bean
-    public CorsWebFilter corsWebFilter() {
-    	System.out.println("IN CORS WEB FILTES");
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.addAllowedMethod(ALLOWED_METHODS);
-        corsConfiguration.addAllowedOrigin("*");
-        UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-        return new CorsWebFilter(corsConfigurationSource);
-    }
-	
-	
-	@Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedMethods(ALLOWED_METHODS);
-    }
-
-	
-	@Bean
-	public WebFilter corsFilter() {
-		return (ServerWebExchange ctx, WebFilterChain chain) -> {
-			ServerHttpRequest request = ctx.getRequest();
-			if (CorsUtils.isCorsRequest(request)) {
-				ServerHttpResponse response = ctx.getResponse();
-		    	HttpHeaders headers = response.getHeaders();
-		    	headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
-		    	headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS);
-		    	headers.add("Access-Control-Max-Age", MAX_AGE);
-		    	if (request.getMethod() == HttpMethod.OPTIONS) {
-		    		  response.setStatusCode(HttpStatus.OK);
-		    		  return Mono.empty();
-		    	}
-			}
-			return chain.filter(ctx);
-	    };
-	}
-	*/
 }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.saitama.microservices.authenticationservice.entity.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT u FROM User u WHERE u.username = :username")
 	public User getUserByUsername(@Param("username") String username);
@@ -19,5 +19,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	public Optional<User> findByUsername(String username);
 	
 	public Optional<User> findByEmail(String email);
+	
+	public Optional<User> findByUuid(UUID uuid);
 	
 }

@@ -2,6 +2,7 @@ package com.saitama.microservices.authenticationservice.jwt;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import com.saitama.microservices.authenticationservice.entity.Authority;
 import com.saitama.microservices.authenticationservice.exception.JwtTokenMalformedException;
 import com.saitama.microservices.authenticationservice.exception.JwtTokenMissingException;
 
@@ -47,8 +49,10 @@ public class JwtUtil {
 		return null;
 	}
 	
-	public String generateToken(String userName) {
+	public String generateToken(String userName, String id, Set<Authority> authorities) {
 		Claims claims = Jwts.claims().setSubject(userName);
+		claims.put("userId", id);
+		claims.put("authorities", authorities);
 		long nowMillis = System.currentTimeMillis();
 		long tokenValidity = Long.parseLong(env.getProperty("jwt.token.validity"));
 		long expMillis = nowMillis + tokenValidity;

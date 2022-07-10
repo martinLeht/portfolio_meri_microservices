@@ -3,15 +3,11 @@ package com.saitama.microservices.authenticationservice.dto;
 public class LoginDTO {
 	
 	private String email;
-	
 	private String password;
 	
-	public LoginDTO() {
-		super();
-	}
+	public LoginDTO() { }
 	
 	public LoginDTO(String email, String password) {
-		super();
 		this.email = email;
 		this.password = password;
 	}

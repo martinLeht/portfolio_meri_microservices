@@ -2,8 +2,9 @@ package com.saitama.microservices.blogservice.dto;
 public class ImageInfoDto {
 
 	private String name;
-	
 	private String url;
+	
+	public ImageInfoDto() { }
 	
 	public ImageInfoDto(String name, String url) {
 		this.name = name;

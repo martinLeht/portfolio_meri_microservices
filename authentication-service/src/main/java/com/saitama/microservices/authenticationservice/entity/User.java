@@ -10,51 +10,41 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class User implements UserDetails {
+@Table(name="auth_user")
+public class User implements org.springframework.security.core.userdetails.UserDetails {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3075540582906344805L;
-
+	
 	@Id
-	@GeneratedValue(generator = "UUID")
-	@GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-	@Column(name = "user_id", nullable = false, updatable = false, unique = true)
-	private UUID id;
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(nullable = false, updatable = false, unique = true)
+	private Long id;
+
+	@Column(nullable = false, updatable = false, unique = true)
+	private UUID uuid;
 	
 	@Column
 	private String email;
 	
 	@Column
 	private String username;
-	
-	@Column(name = "first_name")
-	private String firstName;
-	
-	@Column(name = "last_name")
-	private String lastName;
-	
-	@Column
-	private String password;
-	
-	@Column(name = "login_attempts")
-	private Integer loginAttempts;
-	
-	@Column
-	private boolean verified;
 	
 	@Column(name = "created_at")
 	@CreationTimestamp
@@ -64,31 +54,36 @@ public class User implements UserDetails {
 	@UpdateTimestamp
 	private Timestamp updatedAt;
 	
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToMany
 	@JoinTable(
 			name = "users_roles",
-			joinColumns = @JoinColumn(name = "user_id"),
-			inverseJoinColumns = @JoinColumn(name = "role_id")
+			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+			inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
 	)
-	private Set<Role> authorities = new HashSet();
+	private Set<Role> authorities;
 	
 	@OneToOne(mappedBy = "user")
 	private JwtRefreshToken refreshToken;
 	
+	@OneToOne(fetch = FetchType.LAZY,
+            cascade =  CascadeType.ALL,
+            mappedBy = "user")
+	private UserProfile userProfile;
+	
+	@OneToOne(fetch = FetchType.LAZY,
+            cascade =  CascadeType.ALL,
+            mappedBy = "user")
+	private UserDetails userDetails;
+	
 	public User() { }
 	
 
-	public User(UUID id, String email, String username, String firstName, String lastName, String password,
-			Integer loginAttempts, boolean verified, Timestamp createdAt, Timestamp updatedAt, Set<Role> authorities, JwtRefreshToken refreshToken) {
-		super();
+	public User(long id, UUID uuid, String email, String username, 
+				Timestamp createdAt, Timestamp updatedAt, Set<Role> authorities, JwtRefreshToken refreshToken) {
 		this.id = id;
+		this.uuid = uuid;
 		this.email = email;
 		this.username = username;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.password = password;
-		this.loginAttempts = loginAttempts;
-		this.verified = verified;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.authorities = authorities;
@@ -96,33 +91,23 @@ public class User implements UserDetails {
 	}
 
 
-	public UUID getId() {
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(UUID id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
-	
 
-	public String getFirstName() {
-		return firstName;
+
+	public UUID getUuid() {
+		return uuid;
 	}
 
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-
-	public String getLastName() {
-		return lastName;
-	}
-
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 
 
@@ -133,26 +118,6 @@ public class User implements UserDetails {
 
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-
-	public Integer getLoginAttempts() {
-		return loginAttempts;
-	}
-
-
-	public void setLoginAttempts(Integer loginAttempts) {
-		this.loginAttempts = loginAttempts;
-	}
-
-
-	public boolean isVerified() {
-		return verified;
-	}
-
-
-	public void setVerified(boolean verified) {
-		this.verified = verified;
 	}
 
 
@@ -186,6 +151,35 @@ public class User implements UserDetails {
 	public void setAuthorities(Set<Role> authorities) {
 		this.authorities = authorities;
 	}
+	
+	public JwtRefreshToken getRefreshToken() {
+		return refreshToken;
+	}
+
+	public void setRefreshToken(JwtRefreshToken refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	@JsonIgnore
+	public UserProfile getUserProfile() {
+		return userProfile;
+	}
+
+
+	public void setUserProfile(UserProfile userProfile) {
+		this.userProfile = userProfile;
+	}
+
+
+	public UserDetails getUserDetails() {
+		return userDetails;
+	}
+
+	@JsonIgnore
+	public void setUserDetails(UserDetails userDetails) {
+		this.userDetails = userDetails;
+	}
+
 
 	@Override
 	public Set<Role> getAuthorities() {
@@ -194,14 +188,11 @@ public class User implements UserDetails {
 
 
 	@Override
+	@JsonIgnore
 	public String getPassword() {
-		return password;
+		return userDetails.getPassword();
 	}
 	
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 
 	@Override
 	public String getUsername() {
@@ -215,34 +206,25 @@ public class User implements UserDetails {
 
 	@Override
 	public boolean isAccountNonExpired() {
-		return verified;
+		return userDetails.isAccountNonExpired();
 	}
 
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return verified;
+		return userDetails.isAccountNonLocked();
 	}
 
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return verified;
+		return userDetails.isCredentialsNonExpired();
 	}
 
 
 	@Override
 	public boolean isEnabled() {
-		return verified;
-	}
-
-	public JwtRefreshToken getRefreshToken() {
-		return refreshToken;
-	}
-
-
-	public void setRefreshToken(JwtRefreshToken refreshToken) {
-		this.refreshToken = refreshToken;
+		return userDetails.isVerified();
 	}
 
 
@@ -253,15 +235,13 @@ public class User implements UserDetails {
 		result = prime * result + ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime * result + ((createdAt == null) ? 0 : createdAt.hashCode());
 		result = prime * result + ((email == null) ? 0 : email.hashCode());
-		result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-		result = prime * result + ((loginAttempts == null) ? 0 : loginAttempts.hashCode());
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((refreshToken == null) ? 0 : refreshToken.hashCode());
 		result = prime * result + ((updatedAt == null) ? 0 : updatedAt.hashCode());
+		result = prime * result + ((userDetails == null) ? 0 : userDetails.hashCode());
+		result = prime * result + ((userProfile == null) ? 0 : userProfile.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
-		result = prime * result + (verified ? 1231 : 1237);
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
 	}
 
@@ -290,30 +270,7 @@ public class User implements UserDetails {
 				return false;
 		} else if (!email.equals(other.email))
 			return false;
-		if (firstName == null) {
-			if (other.firstName != null)
-				return false;
-		} else if (!firstName.equals(other.firstName))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (lastName == null) {
-			if (other.lastName != null)
-				return false;
-		} else if (!lastName.equals(other.lastName))
-			return false;
-		if (loginAttempts == null) {
-			if (other.loginAttempts != null)
-				return false;
-		} else if (!loginAttempts.equals(other.loginAttempts))
-			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
+		if (id != other.id)
 			return false;
 		if (refreshToken == null) {
 			if (other.refreshToken != null)
@@ -325,12 +282,25 @@ public class User implements UserDetails {
 				return false;
 		} else if (!updatedAt.equals(other.updatedAt))
 			return false;
+		if (userDetails == null) {
+			if (other.userDetails != null)
+				return false;
+		} else if (!userDetails.equals(other.userDetails))
+			return false;
+		if (userProfile == null) {
+			if (other.userProfile != null)
+				return false;
+		} else if (!userProfile.equals(other.userProfile))
+			return false;
 		if (username == null) {
 			if (other.username != null)
 				return false;
 		} else if (!username.equals(other.username))
 			return false;
-		if (verified != other.verified)
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
 			return false;
 		return true;
 	}
@@ -338,9 +308,9 @@ public class User implements UserDetails {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", email=" + email + ", username=" + username + ", firstName=" + firstName
-				+ ", lastName=" + lastName + ", password=" + password + ", loginAttempts=" + loginAttempts
-				+ ", verified=" + verified + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", authorities="
-				+ authorities + ", refreshToken=" + refreshToken + "]";
-	}	
+		return "User [id=" + id + ", uuid=" + uuid + ", email=" + email + ", username=" + username + ", createdAt="
+				+ createdAt + ", updatedAt=" + updatedAt + ", authorities=" + authorities + ", refreshToken="
+				+ refreshToken + ", userProfile=" + userProfile + ", userDetails=" + userDetails + "]";
+	}
+
 }

@@ -7,12 +7,13 @@ import java.util.UUID;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import com.saitama.microservices.authenticationservice.dto.LoginDTO;
+import com.saitama.microservices.authenticationservice.dto.RegisterDTO;
 import com.saitama.microservices.authenticationservice.dto.UserDTO;
 import com.saitama.microservices.authenticationservice.entity.User;
 
 public interface IUserService extends UserDetailsService {
 	
-	public User registerUser(UserDTO userDto);
+	public User registerUser(RegisterDTO registerDto);
 	
 	public User authenticateUser(LoginDTO loginDto);
 	

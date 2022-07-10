@@ -3,14 +3,16 @@ package com.saitama.microservices.blogservice.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.saitama.microservices.blogservice.utils.BlogPostMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class AppBeanConfig {
 
-	
 	@Bean
-	public BlogPostMapper blogPostMapper() {
-		return new BlogPostMapper();
+	public ObjectMapper objectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		return objectMapper;
 	}
 }

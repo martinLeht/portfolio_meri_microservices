@@ -1,13 +1,15 @@
 package com.saitama.microservices.authenticationservice.service;
 
 import java.util.Optional;
+import java.util.Set;
 
+import com.saitama.microservices.authenticationservice.entity.Authority;
 import com.saitama.microservices.authenticationservice.entity.JwtRefreshToken;
 import com.saitama.microservices.authenticationservice.entity.User;
 
 public interface IJwtService {
 	
-	public String getJwtToken(String id);
+	public String getJwtToken(String username, String id, Set<Authority> authorities);
 
 	public JwtRefreshToken getRefreshToken(String id);
 	

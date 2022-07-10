@@ -1,7 +1,6 @@
 package com.saitama.microservices.authenticationservice.entity;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "jwt_refresh_token")
@@ -26,7 +23,7 @@ public class JwtRefreshToken {
 	private String token;
 	
 	@OneToOne
-	@JoinColumn(name = "user_id", referencedColumnName = "user_id")
+	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User user;
 	
 	

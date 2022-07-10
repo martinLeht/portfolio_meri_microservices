@@ -3,29 +3,30 @@ package com.saitama.microservices.blogservice.service;
 import java.util.List;
 
 import com.saitama.microservices.blogservice.dto.BlogPostDto;
-import com.saitama.microservices.blogservice.entity.BlogPost;
-import com.saitama.microservices.blogservice.entity.ParentEntity;
-import com.saitama.microservices.blogservice.entity.Tag;
+import com.saitama.microservices.blogservice.dto.PageRequestDto;
+import com.saitama.microservices.blogservice.dto.PaginationDto;
+import com.saitama.microservices.blogservice.dto.TagDto;
+
 
 public interface IBlogPostService {
 	
-	public List<BlogPost> getBlogPosts();
+	public List<BlogPostDto> getBlogPosts();
 	
-	public BlogPost getBlogPostById(Long id);
+	public List<BlogPostDto> getBlogPostsByUserId(String userId);
 	
-	public List<Tag> getTags();
+	public BlogPostDto getBlogPostById(Long id);
 	
-	public List<Tag> getLatestTags();
+	public PaginationDto<TagDto> getTags(PageRequestDto pageDto);
 	
-	public Tag getTagById(Long id);
+	public List<TagDto> getTagsByUserId(String userId);
 	
-	public BlogPost createBlogPost(BlogPost post);
+	public List<TagDto> getLatestTagsByUserId(String userId);
 	
-	public BlogPost updateBlogPost(Long id, BlogPostDto postDto, BlogPost post);
+	public TagDto getTagById(Long id);
+	
+	public BlogPostDto createBlogPost(BlogPostDto postDto);
+	
+	public BlogPostDto updateBlogPost(Long id, BlogPostDto postDto);
 	
 	public void deleteBlogPostById(Long id);
-	
-	public void deleteParent(Long id);
-	
-	public ParentEntity getEntityById(Long id);
 }

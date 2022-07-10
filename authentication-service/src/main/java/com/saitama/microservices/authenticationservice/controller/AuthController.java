@@ -1,5 +1,8 @@
 package com.saitama.microservices.authenticationservice.controller;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.saitama.microservices.authenticationservice.dto.JwtDTO;
 import com.saitama.microservices.authenticationservice.dto.LoginDTO;
+import com.saitama.microservices.authenticationservice.dto.RegisterDTO;
 import com.saitama.microservices.authenticationservice.dto.UserDTO;
+import com.saitama.microservices.authenticationservice.entity.Authority;
 import com.saitama.microservices.authenticationservice.entity.JwtRefreshToken;
+import com.saitama.microservices.authenticationservice.entity.Role;
 import com.saitama.microservices.authenticationservice.entity.User;
 import com.saitama.microservices.authenticationservice.exception.JwtTokenRefreshException;
 import com.saitama.microservices.authenticationservice.service.IJwtService;
@@ -41,8 +47,9 @@ public class AuthController {
 		User authenticatedUser = userService.authenticateUser(loginDto);
 		if (authenticatedUser != null) {
 			jwtService.deleteByUser(authenticatedUser);
-			String accessToken = jwtService.getJwtToken(authenticatedUser.getId().toString());
-			JwtRefreshToken refreshToken = jwtService.getRefreshToken(authenticatedUser.getId().toString());
+			Set<Authority> authorities = authenticatedUser.getAuthorities().stream().map(Role::getAuthorityEnum).collect(Collectors.toSet());
+			String accessToken = jwtService.getJwtToken(authenticatedUser.getUsername(), authenticatedUser.getUuid().toString(), authorities);
+			JwtRefreshToken refreshToken = jwtService.getRefreshToken(authenticatedUser.getUuid().toString());
 			return new ResponseEntity<JwtDTO>(new JwtDTO(accessToken, refreshToken.getToken()), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<JwtDTO>(new JwtDTO(), HttpStatus.UNAUTHORIZED);
@@ -57,17 +64,17 @@ public class AuthController {
 				.map(jwtService::verifyRefreshTokenValidity)
 				.map(JwtRefreshToken::getUser)
 				.map(user -> {
-					String token = jwtService.getJwtToken(user.getId().toString());
+					Set<Authority> authorities = user.getAuthorities().stream().map(Role::getAuthorityEnum).collect(Collectors.toSet());
+					String token = jwtService.getJwtToken(user.getUsername(), user.getUuid().toString(), authorities);
 					return new ResponseEntity<JwtDTO>(new JwtDTO(token, refreshToken), HttpStatus.OK);
 				})
-				.orElseThrow(() -> new JwtTokenRefreshException(refreshToken, "Refresh token missing from database!"));
+				.orElseThrow(() -> new JwtTokenRefreshException(refreshToken, "Refresh token missing!"));
 	}
 	
 	@PostMapping("/register")
-	public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDto) {
+	public ResponseEntity<UserDTO> register(@RequestBody RegisterDTO registerDto) {
 		/* Save user */
-		User newUser = userService.registerUser(userDto);
-		newUser.setPassword(null);
+		User newUser = userService.registerUser(registerDto);
 		
 		UserDTO newUserDto = mapUserToDto(newUser);
 		return new ResponseEntity<UserDTO>(newUserDto, HttpStatus.OK);
