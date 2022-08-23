@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
@@ -16,7 +17,16 @@ import javax.persistence.Table;
 public class JwtRefreshToken {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(
+	    strategy = GenerationType.SEQUENCE,
+	    generator = "jwt_refresh_token_generator"
+	)
+	@SequenceGenerator(
+	    name = "jwt_refresh_token_generator",
+	    sequenceName = "jwt_refresh_token_seq",
+	    allocationSize = 3
+	)
+	@Column(nullable = false, updatable = false, unique = true)
 	private Long id;
 	
 	@Column(nullable = false, unique = true)

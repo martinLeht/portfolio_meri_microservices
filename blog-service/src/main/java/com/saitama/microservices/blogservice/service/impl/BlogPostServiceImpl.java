@@ -1,13 +1,7 @@
 package com.saitama.microservices.blogservice.service.impl;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,20 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.saitama.microservices.blogservice.dto.AttachmentDto;
-import com.saitama.microservices.blogservice.dto.BlogPostDto;
-import com.saitama.microservices.blogservice.dto.ContentBlockDto;
-import com.saitama.microservices.blogservice.dto.ImageInfoDto;
-import com.saitama.microservices.blogservice.dto.PageRequestDto;
-import com.saitama.microservices.blogservice.dto.PaginationDto;
-import com.saitama.microservices.blogservice.dto.TagDto;
-import com.saitama.microservices.blogservice.dto.TextFragmentDto;
+import com.saitama.microservices.blogservice.dto.AttachmentDTO;
+import com.saitama.microservices.blogservice.dto.BlogPostDTO;
+import com.saitama.microservices.blogservice.dto.TagDTO;
 import com.saitama.microservices.blogservice.model.Attachment;
 import com.saitama.microservices.blogservice.model.BlogPost;
 import com.saitama.microservices.blogservice.model.ContentBlock;
@@ -42,6 +28,9 @@ import com.saitama.microservices.blogservice.repository.TagRepository;
 import com.saitama.microservices.blogservice.resource.BlockType;
 import com.saitama.microservices.blogservice.service.IBlogPostService;
 import com.saitama.microservices.blogservice.service.ISequenceGeneratorService;
+import com.saitama.microservices.commonlib.dto.MediaFileDTO;
+import com.saitama.microservices.commonlib.dto.PageRequestDTO;
+import com.saitama.microservices.commonlib.dto.PaginationDTO;
 
 @Service
 public class BlogPostServiceImpl implements IBlogPostService {
@@ -68,55 +57,28 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 
 	@Override
-	public List<BlogPostDto> getBlogPosts() {
+	public List<BlogPostDTO> getBlogPosts() {
 		List<BlogPost> posts = blogPostRepository.findAll();
-		List<BlogPostDto> postsDto = posts.stream()
+		List<BlogPostDTO> postsDto = posts.stream()
 				.map(this::convertBlogPostToDto)
 				.collect(Collectors.toList());
 		return postsDto;
 	}
 	
 	@Override
-	public List<BlogPostDto> getBlogPostsByUserId(String userId) {
+	public List<BlogPostDTO> getBlogPostsByUserId(String userId) {
 		List<BlogPost> posts = queryHelper.queryByField("userId", userId, BlogPost.class);
-		List<BlogPostDto> postsDto = posts.stream()
+		List<BlogPostDTO> postsDto = posts.stream()
 				.map(this::convertBlogPostToDto)
 				.collect(Collectors.toList());
 		return postsDto;
 	}
 
 	@Override
-	public BlogPostDto getBlogPostById(Long id) {
+	public BlogPostDTO getBlogPostById(Long id) {
 		Optional<BlogPost> blogPostOpt = blogPostRepository.findById(id);
 		if (blogPostOpt.isPresent()) {
-			BlogPost blogPost = blogPostOpt.get();
-			/*
-			List<String> expiredAttachmentNames = blogPost.getAttachments().stream()
-										.filter(att -> hasAttachmentUrlExpired(att.getLink()))
-										.map(att -> att.getName())
-										.distinct()
-										.collect(Collectors.toList());
-			if (expiredAttachmentNames.size() > 0) {
-				Map<String, ImageInfoDto> refreshedAttachmentsDto = storageServiceProxy.getFilesUrls(expiredAttachmentNames);
-				
-				// Replace the expired attachment URL:s in post content
-				for (ContentBlock block: blogPost.getContent()) {
-					if (block.getType().equals(BlockType.IMAGE.getType())) {
-						String attachmentName = block.getAttachment().getName();
-						if (refreshedAttachmentsDto.containsKey(attachmentName)) {
-							block.getAttachment().setLink(refreshedAttachmentsDto.get(attachmentName).getUrl());
-						}
-					}
-				}
-				
-				if (blogPost.isNew()) blogPost.setPersisted(true);
-				
-				BlogPost updatedPost = blogPostRepository.save(blogPost);
-				
-				return convertBlogPostToDto(updatedPost);
-			}
-			*/
-			
+			BlogPost blogPost = blogPostOpt.get();			
 			return convertBlogPostToDto(blogPost);
 		}
 		return null;
@@ -124,38 +86,49 @@ public class BlogPostServiceImpl implements IBlogPostService {
 
 	
 	@Override
-	public PaginationDto<TagDto> getTags(PageRequestDto pageDto) {
+	public PaginationDTO<TagDTO> getTags(PageRequestDTO pageDto) {
 		Page<Tag> tags = null;
 		Pageable sortedByCreatedAt = null;
 		if (pageDto == null || pageDto.getPage() == null || pageDto.getSize() == null) {
-			sortedByCreatedAt = PageRequest.of(PageRequestDto.DEFAULT_PAGE, PageRequestDto.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
+			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
 		} else {
-			if (pageDto.getSize() > PageRequestDto.MAX_SIZE) {
-				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), PageRequestDto.MAX_SIZE, Sort.Direction.DESC, "createdAt");
+			if (pageDto.getSize() > PageRequestDTO.MAX_SIZE) {
+				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), PageRequestDTO.MAX_SIZE, Sort.Direction.DESC, "createdAt");
 			} else {
 				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), pageDto.getSize(), Sort.Direction.DESC, "createdAt");
 			}
 		}
 		tags = tagRepository.findAll(sortedByCreatedAt);		
 		
-		List<TagDto> tagDtos = tags.stream()
+		List<TagDTO> tagDtos = tags.stream()
 				.map(this::convertTagToDto)
 				.collect(Collectors.toList());
 		
 		if (tags.getNumber() + 1 < tags.getTotalPages()) {
-			return new PaginationDto<TagDto>(tags.getNumber(), tags.getSize(), tags.getTotalElements(), tags.getNumber() + 1, tagDtos);
+			return PaginationDTO.<TagDTO>builder()
+					.page(tags.getNumber())
+					.pageSize(tags.getSize())
+					.totalSize(tags.getTotalElements())
+					.nextPage(tags.getNumber() + 1)
+					.data(tagDtos)
+					.build();
 		} else {
-			return new PaginationDto<TagDto>(tags.getNumber(), tags.getSize(), tags.getTotalElements(), null, tagDtos);
+			return PaginationDTO.<TagDTO>builder()
+					.page(tags.getNumber())
+					.pageSize(tags.getSize())
+					.totalSize(tags.getTotalElements())
+					.data(tagDtos)
+					.build();
 		}
 	}
 	
 	@Override
-	public List<TagDto> getTagsByUserId(String userId) {
+	public List<TagDTO> getTagsByUserId(String userId) {
 		List<Tag> tags = queryHelper.queryByFieldAndSort("userId", userId, Sort.Direction.DESC, "createdAt", Tag.class);
-		List<TagDto> tagsDto = tags.stream()
+		List<TagDTO> tagsDto = tags.stream()
 				.map(this::convertTagToDto)
 				.collect(Collectors.toList());
-		List<TagDto> tagDtos = tags.stream()
+		List<TagDTO> tagDtos = tags.stream()
 				.map(this::convertTagToDto)
 				.collect(Collectors.toList());
 		
@@ -163,9 +136,9 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 	
 	@Override
-	public List<TagDto> getLatestTagsByUserId(String userId) {
+	public List<TagDTO> getLatestTagsByUserId(String userId) {
 		List<Tag> tags = queryHelper.queryByFieldAndSort("userId", userId, Sort.Direction.DESC, "createdAt", Tag.class);
-		List<TagDto> tagDtos = tags.stream()
+		List<TagDTO> tagDtos = tags.stream()
 				.map(this::convertTagToDto)
 				.collect(Collectors.toList());
 		return tagDtos;
@@ -173,7 +146,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 
 
 	@Override
-	public TagDto getTagById(Long id) {
+	public TagDTO getTagById(Long id) {
 		Optional<Tag> tagOpt = tagRepository.findById(id);
 		if (tagOpt.isPresent()) {
 			return convertTagToDto(tagOpt.get());
@@ -183,7 +156,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	
 	
 	@Override
-	public BlogPostDto createBlogPost(BlogPostDto postDto) {
+	public BlogPostDTO createBlogPost(BlogPostDTO postDto) {
 		BlogPost post = mapper.convertValue(postDto, BlogPost.class);
 		
 		// Appends text fragments to construct post intro
@@ -213,14 +186,14 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			Attachment thumbnail = newPost.getAttachments().get(0);
 			tag.setThumbnail(thumbnail);
 		} else {
-			ImageInfoDto placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
-			tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getUrl()));
+			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
+			tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
 		}
 		Tag newTag = tagRepository.save(tag);
 		
 		if (newTag != null) {
-			TagDto tagDto = convertTagToDto(newTag);
-			BlogPostDto newPostDto = convertBlogPostToDto(newPost);
+			TagDTO tagDto = convertTagToDto(newTag);
+			BlogPostDTO newPostDto = convertBlogPostToDto(newPost);
 			newPostDto.setTag(tagDto);
 			return newPostDto;
 		}
@@ -229,7 +202,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 	
 	@Override
-	public BlogPostDto updateBlogPost(Long id, BlogPostDto postDto) {
+	public BlogPostDTO updateBlogPost(Long id, BlogPostDTO postDto) {
 		Optional<BlogPost> postToUpdateOpt = blogPostRepository.findById(id);
 		if (postToUpdateOpt.isPresent()) {
 			BlogPost postToUpdate = postToUpdateOpt.get();
@@ -270,14 +243,14 @@ public class BlogPostServiceImpl implements IBlogPostService {
 					if (saved.getAttachments().size() > 0) {
 						tag.setThumbnail(saved.getAttachments().get(0));			
 					} else {
-						ImageInfoDto placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
-						tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getUrl()));
+						MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
+						tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
 					}
 					
 					
 					Tag savedTag = tagRepository.save(tag);
-					TagDto tagDto = convertTagToDto(savedTag);
-					BlogPostDto newPostDto = convertBlogPostToDto(saved);
+					TagDTO tagDto = convertTagToDto(savedTag);
+					BlogPostDTO newPostDto = convertBlogPostToDto(saved);
 					newPostDto.setTag(tagDto);
 					return newPostDto;
 				}
@@ -312,34 +285,15 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		}
 	}
 	
-	/*
-	private boolean hasAttachmentUrlExpired(String url) {
-		String[] urlQueryParams = url.split("\\?(?!\\?)", 2)[1].split("&");
-		Long expiryTimeEpoch = Arrays.stream(urlQueryParams)
-										.filter(qParam -> qParam.startsWith("Expires"))
-										.map(qParam -> Long.parseLong(qParam.split("=", 2)[1]))
-										.findAny()
-										.orElse(null);
-		if (expiryTimeEpoch != null) {
-			LocalDateTime expiryDateTime = LocalDateTime.ofEpochSecond(expiryTimeEpoch, 0, ZoneOffset.UTC);
-			System.out.println(expiryDateTime);
-			System.out.println(LocalDateTime.now().plusHours(2));
-			return expiryDateTime.isAfter(LocalDateTime.now().plusHours(2));
-		}
-		
-		return true;
-	}
-	*/
-	
-	private BlogPostDto convertBlogPostToDto(BlogPost post) {
-		return mapper.convertValue(post, BlogPostDto.class);
+	private BlogPostDTO convertBlogPostToDto(BlogPost post) {
+		return mapper.convertValue(post, BlogPostDTO.class);
 	}
 	
-	private TagDto convertTagToDto(Tag tag) {
-		return mapper.convertValue(tag, TagDto.class);
+	private TagDTO convertTagToDto(Tag tag) {
+		return mapper.convertValue(tag, TagDTO.class);
 	}
 	
-	private Attachment convertAttachmentDtoToModel(AttachmentDto attachment) {
+	private Attachment convertAttachmentDtoToModel(AttachmentDTO attachment) {
 		return mapper.convertValue(attachment, Attachment.class);
 	}
 	

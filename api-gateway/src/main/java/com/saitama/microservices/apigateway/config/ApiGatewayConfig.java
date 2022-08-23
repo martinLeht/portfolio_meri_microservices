@@ -28,6 +28,8 @@ public class ApiGatewayConfig {
 						.uri("http://blog-service.blog-service.svc.cluster.local:80"))
 				.route("image-service", pred -> pred.path("/storage/**").filters(f -> f.filter(authFilter))
 						.uri("http://storage-service.storage-service.svc.cluster.local:80"))
+				.route("portfolio-data-service", pred -> pred.path("/portfolio/**").filters(f -> f.filter(authFilter))
+						.uri("http://portfolio-data-service.portfolio-data-service.svc.cluster.local:80"))
 				.build();
 	}
 }

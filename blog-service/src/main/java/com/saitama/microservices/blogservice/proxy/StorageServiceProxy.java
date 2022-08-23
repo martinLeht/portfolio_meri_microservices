@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.saitama.microservices.blogservice.dto.ImageInfoDto;
+import com.saitama.microservices.commonlib.dto.MediaFileDTO;
 
 
 @FeignClient(name = "storage-service")
 public interface StorageServiceProxy {
 	
 	@GetMapping("/storage/get")
-    public ImageInfoDto getFileUrl(@RequestParam String fileName);
+    public MediaFileDTO getFileUrl(@RequestParam String fileName);
 	
 	@PostMapping("/storage/get/files")
-    public Map<String, ImageInfoDto> getFilesUrls(@RequestBody List<String> fileNames);
+    public Map<String, MediaFileDTO> getFilesUrls(@RequestBody List<String> fileNames);
 	
 	@PostMapping("/storage/delete")
 	public void deleteFile(String fileName);

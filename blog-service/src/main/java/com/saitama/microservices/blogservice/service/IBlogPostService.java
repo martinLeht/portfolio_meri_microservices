@@ -2,31 +2,31 @@ package com.saitama.microservices.blogservice.service;
 
 import java.util.List;
 
-import com.saitama.microservices.blogservice.dto.BlogPostDto;
-import com.saitama.microservices.blogservice.dto.PageRequestDto;
-import com.saitama.microservices.blogservice.dto.PaginationDto;
-import com.saitama.microservices.blogservice.dto.TagDto;
+import com.saitama.microservices.blogservice.dto.BlogPostDTO;
+import com.saitama.microservices.blogservice.dto.TagDTO;
+import com.saitama.microservices.commonlib.dto.PageRequestDTO;
+import com.saitama.microservices.commonlib.dto.PaginationDTO;
 
 
 public interface IBlogPostService {
 	
-	public List<BlogPostDto> getBlogPosts();
+	public List<BlogPostDTO> getBlogPosts();
 	
-	public List<BlogPostDto> getBlogPostsByUserId(String userId);
+	public List<BlogPostDTO> getBlogPostsByUserId(String userId);
 	
-	public BlogPostDto getBlogPostById(Long id);
+	public BlogPostDTO getBlogPostById(Long id);
 	
-	public PaginationDto<TagDto> getTags(PageRequestDto pageDto);
+	public PaginationDTO<TagDTO> getTags(PageRequestDTO pageDto);
 	
-	public List<TagDto> getTagsByUserId(String userId);
+	public List<TagDTO> getTagsByUserId(String userId);
 	
-	public List<TagDto> getLatestTagsByUserId(String userId);
+	public List<TagDTO> getLatestTagsByUserId(String userId);
 	
-	public TagDto getTagById(Long id);
+	public TagDTO getTagById(Long id);
 	
-	public BlogPostDto createBlogPost(BlogPostDto postDto);
+	public BlogPostDTO createBlogPost(BlogPostDTO postDto);
 	
-	public BlogPostDto updateBlogPost(Long id, BlogPostDto postDto);
+	public BlogPostDTO updateBlogPost(Long id, BlogPostDTO postDto);
 	
 	public void deleteBlogPostById(Long id);
 }

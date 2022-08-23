@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -28,8 +29,16 @@ public class Role implements GrantedAuthority {
 	
     
     @Id
+	@GeneratedValue(
+	    strategy = GenerationType.SEQUENCE,
+	    generator = "role_generator"
+	)
+	@SequenceGenerator(
+	    name = "role_generator",
+	    sequenceName = "role_seq",
+	    allocationSize = 3
+	)
     @Column
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @Enumerated(EnumType.STRING)

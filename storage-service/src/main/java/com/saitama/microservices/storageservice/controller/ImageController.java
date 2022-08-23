@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.saitama.microservices.storageservice.dto.ImageInfoDto;
+import com.saitama.microservices.commonlib.constant.MediaType;
+import com.saitama.microservices.commonlib.dto.MediaFileDTO;
 import com.saitama.microservices.storageservice.service.IGoogleCloudStorageService;
 
 @RestController
@@ -35,38 +37,38 @@ public class ImageController {
 	}
 
 	@PostMapping("/upload")
-    public ImageInfoDto uploadFile(@RequestPart("file") MultipartFile file) throws IOException {		
+    public MediaFileDTO uploadFile(@RequestPart("file") MultipartFile file) throws IOException {		
         URL url = cloudStorageService.uploadFile(file);
-        ImageInfoDto imageInfo = new ImageInfoDto(file.getOriginalFilename(), url.toString());
-        return imageInfo;
+        return new MediaFileDTO(file.getOriginalFilename(), url.toString(), MediaType.IMAGE);
     }
 	
 	@GetMapping("/get")
-    public ImageInfoDto getFileUrl(@RequestParam String fileName) throws IOException {		
+    public MediaFileDTO getFileUrl(@RequestParam String fileName) throws IOException {		
         Optional<URL> urlOpt = cloudStorageService.getFileByName(fileName);
         if (urlOpt.isPresent()) {
-        	 return new ImageInfoDto(fileName, urlOpt.get().toString());
+        	 return new MediaFileDTO(fileName, urlOpt.get().toString(), MediaType.IMAGE);
         }
-        return new ImageInfoDto(null, null);
+        return new MediaFileDTO(null, null, null);
         
     }
 	
 	@PostMapping("/get/files")
-    public Map<String, ImageInfoDto> getFilesUrls(@RequestBody List<String> fileNames) throws IOException {		
+    public Map<String, MediaFileDTO> getFilesUrls(@RequestBody List<String> fileNames) throws IOException {		
         Map<String, URL> urls = cloudStorageService.getFilesByNames(fileNames);
         if (urls.size() > 0) {
-        	Map<String, ImageInfoDto> imageInfoDtos = fileNames.stream()
-        			.map(name -> new ImageInfoDto(name, urls.get(name).toString()))
-        			.collect(Collectors.toMap(ImageInfoDto::getName, Function.identity()));
-    		return imageInfoDtos;
+        	Map<String, MediaFileDTO> mediaFileDtos = fileNames.stream()
+        			.map(name -> new MediaFileDTO(name, urls.get(name).toString(), MediaType.IMAGE))
+        			.collect(Collectors.toMap(MediaFileDTO::getName, Function.identity()));
+    		return mediaFileDtos;
         }
         return Collections.emptyMap();
         
     }
 	
-	@PostMapping("/delete")
-	public void deleteFile(String fileName) {
-		cloudStorageService.deleteFile(fileName);
+	@DeleteMapping("/delete")
+	public String deleteFile(@RequestParam String fileName) {
+		boolean success = cloudStorageService.deleteFile(fileName);
+		return success ? fileName : null;
 	}
 	
 	@PostMapping("/delete/files")

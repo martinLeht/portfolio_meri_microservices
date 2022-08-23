@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.6</version>
+		<version>2.7.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.saitama.microservices</groupId>
@@ -16,8 +16,9 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud-gcp.version>2.0.4</spring-cloud-gcp.version>
-		<spring-cloud.version>2021.0.1</spring-cloud.version>
+		<spring-cloud.version>2021.0.3</spring-cloud.version>
 		<commons-fileupload.version>1.3.1</commons-fileupload.version>
+		<springdoc-openapi.version>1.6.4</springdoc-openapi.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -52,6 +53,18 @@
 		<dependency>
 		    <groupId>com.google.cloud</groupId>
 		    <artifactId>spring-cloud-gcp-starter-storage</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springdoc</groupId>
+		    <artifactId>springdoc-openapi-ui</artifactId>
+		    <version>${springdoc-openapi.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.saitama.microservices</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- For discovery through eureka service discovery

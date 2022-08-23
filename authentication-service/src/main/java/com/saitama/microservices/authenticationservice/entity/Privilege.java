@@ -10,23 +10,34 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+
 
 @Entity
 public class Privilege {
- 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private PrivilegeType name;
+	@Id
+	@GeneratedValue(
+	    strategy = GenerationType.SEQUENCE,
+	    generator = "privilege_generator"
+	)
+	@SequenceGenerator(
+	    name = "privilege_generator",
+	    sequenceName = "privilege_seq",
+	    allocationSize = 3
+	)
+	@Column(nullable = false, updatable = false, unique = true)
+	private Long id;
 
-    @ManyToMany(mappedBy = "privileges")
-    private Collection<Role> roles;
-    
-    
-	public Privilege() { }
+	@Enumerated(EnumType.STRING)
+	@Column
+	private PrivilegeType name;
+
+	@ManyToMany(mappedBy = "privileges")
+	private Collection<Role> roles;
+
+	public Privilege() {
+	}
 
 	public Privilege(PrivilegeType name) {
 		super();

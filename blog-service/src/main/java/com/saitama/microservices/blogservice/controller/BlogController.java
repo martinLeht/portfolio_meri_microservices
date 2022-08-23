@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.saitama.microservices.blogservice.dto.BlogPostDto;
-import com.saitama.microservices.blogservice.dto.PageRequestDto;
-import com.saitama.microservices.blogservice.dto.PaginationDto;
-import com.saitama.microservices.blogservice.dto.TagDto;
+import com.saitama.microservices.blogservice.dto.BlogPostDTO;
+import com.saitama.microservices.blogservice.dto.TagDTO;
 import com.saitama.microservices.blogservice.service.IBlogPostService;
+import com.saitama.microservices.commonlib.dto.PageRequestDTO;
+import com.saitama.microservices.commonlib.dto.PaginationDTO;
 
 @RestController
 @RequestMapping("/blog")
@@ -54,21 +54,21 @@ public class BlogController {
 
 
 	@GetMapping("/")
-	public List<BlogPostDto> getBlogPosts() {
-		List<BlogPostDto> postsDto = blogPostService.getBlogPosts();
+	public List<BlogPostDTO> getBlogPosts() {
+		List<BlogPostDTO> postsDto = blogPostService.getBlogPosts();
 		return postsDto;
 	}
 	
 	
 	@GetMapping("/{id}")
-	public BlogPostDto getBlogPost(@PathVariable Long id) {
-		BlogPostDto postDto = blogPostService.getBlogPostById(id);
+	public BlogPostDTO getBlogPost(@PathVariable Long id) {
+		BlogPostDTO postDto = blogPostService.getBlogPostById(id);
 		return postDto;
 	}
 	
 	@GetMapping("/tag")
-	public PaginationDto<TagDto> getBlogTags(@RequestBody(required = false) PageRequestDto pageDto) {
-		PaginationDto<TagDto> tagsPaginationDto = blogPostService.getTags(pageDto);
+	public PaginationDTO<TagDTO> getBlogTags(@RequestBody(required = false) PageRequestDTO pageDto) {
+		PaginationDTO<TagDTO> tagsPaginationDto = blogPostService.getTags(pageDto);
 		return tagsPaginationDto;
 	}
 	
@@ -81,24 +81,24 @@ public class BlogController {
 	*/
 	
 	@GetMapping("/{id}/tag")
-	public TagDto getBlogTag(@PathVariable Long id) {
-		TagDto tagDto = blogPostService.getTagById(id);
+	public TagDTO getBlogTag(@PathVariable Long id) {
+		TagDTO tagDto = blogPostService.getTagById(id);
 		return tagDto;
 	}
 	
 	
 	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
-	public BlogPostDto createBlogPost(@RequestBody BlogPostDto postDto) {
-		BlogPostDto newPostDto = blogPostService.createBlogPost(postDto);
+	public BlogPostDTO createBlogPost(@RequestBody BlogPostDTO postDto) {
+		BlogPostDTO newPostDto = blogPostService.createBlogPost(postDto);
 		return newPostDto;
 	}
 	
 	
 	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public BlogPostDto updateBlogPost(@PathVariable Long id, @RequestBody BlogPostDto postDto) {
-		BlogPostDto updatedPostDto = blogPostService.updateBlogPost(id, postDto);
+	public BlogPostDTO updateBlogPost(@PathVariable Long id, @RequestBody BlogPostDTO postDto) {
+		BlogPostDTO updatedPostDto = blogPostService.updateBlogPost(id, postDto);
 		return updatedPostDto;
 	}
 	

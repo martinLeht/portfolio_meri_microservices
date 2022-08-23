@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,7 +34,15 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	private static final long serialVersionUID = -3075540582906344805L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(
+	    strategy = GenerationType.SEQUENCE,
+	    generator = "auth_user_generator"
+	)
+	@SequenceGenerator(
+	    name = "auth_user_generator",
+	    sequenceName = "auth_user_seq",
+	    allocationSize = 3
+	)
 	@Column(nullable = false, updatable = false, unique = true)
 	private Long id;
 
