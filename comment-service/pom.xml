@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.3</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.saitama.microservices</groupId>
+        <groupId>com.saitama.microservices</groupId>
+        <artifactId>portfolio-microservices</artifactId>
+        <version>1.0.0</version>
+    </parent>		
+
 	<artifactId>comment-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>comment-service</name>
@@ -53,6 +53,13 @@
 		    <groupId>org.springdoc</groupId>
 		    <artifactId>springdoc-openapi-ui</artifactId>
 		    <version>${springdoc-openapi.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.saitama.microservices</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
 		</dependency>
 
 

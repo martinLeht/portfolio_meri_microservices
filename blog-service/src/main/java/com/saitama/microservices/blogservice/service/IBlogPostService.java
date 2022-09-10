@@ -6,15 +6,12 @@ import com.saitama.microservices.blogservice.dto.BlogPostDTO;
 import com.saitama.microservices.blogservice.dto.TagDTO;
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
+import com.saitama.microservices.commonlib.service.IBaseReadWriteService;
 
 
-public interface IBlogPostService {
-	
-	public List<BlogPostDTO> getBlogPosts();
+public interface IBlogPostService extends IBaseReadWriteService<BlogPostDTO, Long> {
 	
 	public List<BlogPostDTO> getBlogPostsByUserId(String userId);
-	
-	public BlogPostDTO getBlogPostById(Long id);
 	
 	public PaginationDTO<TagDTO> getTags(PageRequestDTO pageDto);
 	
@@ -23,10 +20,4 @@ public interface IBlogPostService {
 	public List<TagDTO> getLatestTagsByUserId(String userId);
 	
 	public TagDTO getTagById(Long id);
-	
-	public BlogPostDTO createBlogPost(BlogPostDTO postDto);
-	
-	public BlogPostDTO updateBlogPost(Long id, BlogPostDTO postDto);
-	
-	public void deleteBlogPostById(Long id);
 }

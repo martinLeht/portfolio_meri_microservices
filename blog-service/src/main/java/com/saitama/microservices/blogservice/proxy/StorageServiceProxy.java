@@ -1,31 +1,30 @@
 package com.saitama.microservices.blogservice.proxy;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.saitama.microservices.commonlib.dto.MediaFileDTO;
+import com.saitama.microservices.commonlib.dto.MediaListQueryDTO;
+import com.saitama.microservices.commonlib.dto.MediaQueryDTO;
 
 
 @FeignClient(name = "storage-service")
 public interface StorageServiceProxy {
 	
-	@GetMapping("/storage/get")
-    public MediaFileDTO getFileUrl(@RequestParam String fileName);
+	@PostMapping("/storage/get")
+    public MediaFileDTO getFileUrl(@RequestBody MediaQueryDTO mediaQueryDto);
 	
 	@PostMapping("/storage/get/files")
-    public Map<String, MediaFileDTO> getFilesUrls(@RequestBody List<String> fileNames);
+    public Map<String, MediaFileDTO> getFilesUrls(@RequestBody MediaListQueryDTO mediaListQueryDto);
 	
 	@PostMapping("/storage/delete")
-	public void deleteFile(String fileName);
+	public void deleteFile(@RequestBody MediaQueryDTO mediaQueryDto);
 	
 	@PostMapping("/storage/delete/files")
-	public void deleteFiles(@RequestBody List<String> fileNames);
+	public void deleteFiles(@RequestBody MediaListQueryDTO mediaListQueryDto);
 
 
 }

@@ -28,7 +28,10 @@ import com.saitama.microservices.blogservice.repository.TagRepository;
 import com.saitama.microservices.blogservice.resource.BlockType;
 import com.saitama.microservices.blogservice.service.IBlogPostService;
 import com.saitama.microservices.blogservice.service.ISequenceGeneratorService;
+import com.saitama.microservices.commonlib.constant.MediaCategory;
 import com.saitama.microservices.commonlib.dto.MediaFileDTO;
+import com.saitama.microservices.commonlib.dto.MediaListQueryDTO;
+import com.saitama.microservices.commonlib.dto.MediaQueryDTO;
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
 
@@ -55,15 +58,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		this.tagRepository = tagRepository;
 		this.mapper = mapper;
 	}
-
-	@Override
-	public List<BlogPostDTO> getBlogPosts() {
-		List<BlogPost> posts = blogPostRepository.findAll();
-		List<BlogPostDTO> postsDto = posts.stream()
-				.map(this::convertBlogPostToDto)
-				.collect(Collectors.toList());
-		return postsDto;
-	}
 	
 	@Override
 	public List<BlogPostDTO> getBlogPostsByUserId(String userId) {
@@ -75,7 +69,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 
 	@Override
-	public BlogPostDTO getBlogPostById(Long id) {
+	public BlogPostDTO getById(Long id) {
 		Optional<BlogPost> blogPostOpt = blogPostRepository.findById(id);
 		if (blogPostOpt.isPresent()) {
 			BlogPost blogPost = blogPostOpt.get();			
@@ -156,7 +150,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	
 	
 	@Override
-	public BlogPostDTO createBlogPost(BlogPostDTO postDto) {
+	public BlogPostDTO create(BlogPostDTO postDto) {
 		BlogPost post = mapper.convertValue(postDto, BlogPost.class);
 		
 		// Appends text fragments to construct post intro
@@ -186,7 +180,11 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			Attachment thumbnail = newPost.getAttachments().get(0);
 			tag.setThumbnail(thumbnail);
 		} else {
-			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
+			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
+					MediaQueryDTO.builder()
+						.fileName(PLACEHOLDER_IMG)
+						.mediaCategory(MediaCategory.BLOG)
+						.build());
 			tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
 		}
 		Tag newTag = tagRepository.save(tag);
@@ -202,7 +200,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 	
 	@Override
-	public BlogPostDTO updateBlogPost(Long id, BlogPostDTO postDto) {
+	public BlogPostDTO update(Long id, BlogPostDTO postDto) {
 		Optional<BlogPost> postToUpdateOpt = blogPostRepository.findById(id);
 		if (postToUpdateOpt.isPresent()) {
 			BlogPost postToUpdate = postToUpdateOpt.get();
@@ -243,7 +241,11 @@ public class BlogPostServiceImpl implements IBlogPostService {
 					if (saved.getAttachments().size() > 0) {
 						tag.setThumbnail(saved.getAttachments().get(0));			
 					} else {
-						MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(PLACEHOLDER_IMG);
+						MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
+								MediaQueryDTO.builder()
+									.fileName(PLACEHOLDER_IMG)
+									.mediaCategory(MediaCategory.BLOG)
+									.build());
 						tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
 					}
 					
@@ -261,7 +263,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 
 	@Override
-	public void deleteBlogPostById(Long id) {
+	public void delete(Long id) {
 		Optional<BlogPost> postOpt = blogPostRepository.findById(id);
 		if (postOpt.isPresent()) {
 			BlogPost post = postOpt.get();
@@ -276,13 +278,26 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			}
 			// Remove all files attached to post from storage before deleting post
 			if (fileNames.size() > 0) {
-				storageServiceProxy.deleteFiles(fileNames);
+				storageServiceProxy.deleteFiles(
+						MediaListQueryDTO.builder()
+							.fileNames(fileNames)
+							.mediaCategory(MediaCategory.BLOG)
+							.build());
 			}
 			
 			blogPostRepository.delete(post);
 			Optional<Tag> tagOpt = tagRepository.findById(id);
 			tagOpt.ifPresent(tag -> tagRepository.delete(tag));
 		}
+	}
+	
+	
+	/**
+	 * Only generated because of IBaseReadWriteService
+	 */
+	@Override
+	public PaginationDTO<BlogPostDTO> getPaginated(PageRequestDTO pageDto) {
+		return null;
 	}
 	
 	private BlogPostDTO convertBlogPostToDto(BlogPost post) {
@@ -296,6 +311,5 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	private Attachment convertAttachmentDtoToModel(AttachmentDTO attachment) {
 		return mapper.convertValue(attachment, Attachment.class);
 	}
-	
 
 }

@@ -1,6 +1,8 @@
 package com.saitama.microservices.portfoliodataservice.controller;
 
 
+import java.util.UUID;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,31 +38,36 @@ public class PortfolioDataController {
 	
 	@GetMapping("/experience")
 	public PaginationDTO<ExperienceDTO> getExperiences(@RequestBody(required = false) PageRequestDTO pageDto) {
-		return experienceService.getExperiences(pageDto);
+		return experienceService.getPaginated(pageDto);
+	}
+	
+	@GetMapping("/experience/public")
+	public PaginationDTO<ExperienceDTO> getPublicExperiences(@RequestBody(required = false) PageRequestDTO pageDto) {
+		return experienceService.getPublicExperiences(pageDto);
 	}
 	
 	
 	@GetMapping("/experience/{id}")
 	public ExperienceDTO getExperienceById(@PathVariable String id) {
-		return experienceService.getExperienceById(id);
+		return experienceService.getById(UUID.fromString(id));
 	}
 	
 	@PostMapping("/experience")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ExperienceDTO createExperience(@RequestBody @Valid ExperienceDTO experienceDto) {
-		return experienceService.createExperience(experienceDto);
+		return experienceService.create(experienceDto);
 	}
 	
 	@PutMapping("/experience/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ExperienceDTO updateExperience(@PathVariable String id, @RequestBody @Valid ExperienceDTO experienceDto) {
-		return experienceService.updateExperience(id, experienceDto);
+		return experienceService.update(UUID.fromString(id), experienceDto);
 	}
 	
 	@DeleteMapping("/experience/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteExperience(@PathVariable String id) {
-		experienceService.deleteExperience(id);
+		experienceService.delete(UUID.fromString(id));
 	}
 	
 }

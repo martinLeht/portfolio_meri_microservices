@@ -42,7 +42,7 @@ public class ExperienceServiceImpl implements IExperienceService {
 	}
 	
 	@Override
-	public PaginationDTO<ExperienceDTO> getExperiences(PageRequestDTO pageDto) {
+	public PaginationDTO<ExperienceDTO> getPaginated(PageRequestDTO pageDto) {
 		Pageable sortedByCreatedAt = null;
 		if (pageDto == null || pageDto.getPage() == null || pageDto.getSize() == null) {
 			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
@@ -77,10 +77,46 @@ public class ExperienceServiceImpl implements IExperienceService {
 		}
 	}
 	
+	@Override
+	public PaginationDTO<ExperienceDTO> getPublicExperiences(PageRequestDTO pageDto) {
+		Pageable sortedByCreatedAt = null;
+		if (pageDto == null || pageDto.getPage() == null || pageDto.getSize() == null) {
+			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
+		} else {
+			if (pageDto.getSize() > PageRequestDTO.MAX_SIZE) {
+				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), PageRequestDTO.MAX_SIZE, Sort.Direction.DESC, "createdAt");
+			} else {
+				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), pageDto.getSize(), Sort.Direction.DESC, "createdAt");
+			}
+		}
+		
+		Page<Experience> experiences = experienceRepository.findByHiddenWithPagination(false, sortedByCreatedAt);		
+		List<ExperienceDTO> experienceDtos = experiences.stream()
+				.map(experienceMapper::toDto)
+				.collect(Collectors.toList());
+		
+		if (experiences.getNumber() + 1 < experiences.getTotalPages()) {
+			return PaginationDTO.<ExperienceDTO>builder()
+					.page(experiences.getNumber())
+					.pageSize(experiences.getSize())
+					.totalSize(experiences.getTotalElements())
+					.nextPage(experiences.getNumber() + 1)
+					.data(experienceDtos)
+					.build();
+		} else {
+			return PaginationDTO.<ExperienceDTO>builder()
+					.page(experiences.getNumber())
+					.pageSize(experiences.getSize())
+					.totalSize(experiences.getTotalElements())
+					.data(experienceDtos)
+					.build();
+		}
+	}
+	
 
 	@Override
-	public ExperienceDTO getExperienceById(String id) {
-		Experience experience = experienceRepository.findByUuid(UUID.fromString(id)).stream()
+	public ExperienceDTO getById(UUID id) {
+		Experience experience = experienceRepository.findByUuid(id).stream()
 				.findFirst()
 				.orElseThrow(() -> new EntityNotFoundException("experience-not-found", "Experience not found with id: " + id));
 		return experienceMapper.toDto(experience);
@@ -88,7 +124,7 @@ public class ExperienceServiceImpl implements IExperienceService {
 	
 
 	@Override
-	public ExperienceDTO createExperience(ExperienceDTO experienceDto) {
+	public ExperienceDTO create(ExperienceDTO experienceDto) {
 		
 		Experience experience = experienceMapper.fromDto(experienceDto);
 		
@@ -111,8 +147,8 @@ public class ExperienceServiceImpl implements IExperienceService {
 	}
 
 	@Override
-	public ExperienceDTO updateExperience(String id, ExperienceDTO experienceDto) {
-		Experience experience = this.experienceRepository.findByUuid(UUID.fromString(id)).stream()
+	public ExperienceDTO update(UUID id, ExperienceDTO experienceDto) {
+		Experience experience = this.experienceRepository.findByUuid(id).stream()
 				.findFirst()
 				.orElseThrow(() -> new EntityNotFoundException("experience-not-found", "Experience not found with id: " + id));
 		
@@ -139,8 +175,8 @@ public class ExperienceServiceImpl implements IExperienceService {
 	}
 
 	@Override
-	public void deleteExperience(String id) {
-		Experience experience = this.experienceRepository.findByUuid(UUID.fromString(id)).stream()
+	public void delete(UUID id) {
+		Experience experience = this.experienceRepository.findByUuid(id).stream()
 				.findFirst()
 				.orElseThrow(() -> new EntityNotFoundException("experience-not-found", "Experience not found with id: " + id));
 		experienceRepository.delete(experience);

@@ -8,7 +8,7 @@ public enum OpenRoute {
 	TOKEN_REFRESH_ROUTE("/auth/token/refresh", HttpMethod.POST),
 	BLOG_TAG_ROUTE("/blog/tag", HttpMethod.GET),
 	BLOG_ROUTE("/blog", HttpMethod.GET),
-	EXPERIENCE_ROUTE("/portfolio/experience", HttpMethod.GET);
+	EXPERIENCE_ROUTE("/portfolio/experience/public", HttpMethod.GET);
 	
 	private String uri;
 	private HttpMethod method;

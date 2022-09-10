@@ -18,7 +18,7 @@ import com.saitama.microservices.authenticationservice.exception.UserExistsExcep
 import com.saitama.microservices.authenticationservice.exception.UserNotFoundException;
 
 @RestControllerAdvice
-public class AuthControllerAdvice {
+public class GlobalExceptionControllerAdvice {
 
 	
 	@ExceptionHandler(value = AuthenticationException.class)

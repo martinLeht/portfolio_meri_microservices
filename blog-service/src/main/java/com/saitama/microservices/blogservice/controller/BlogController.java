@@ -51,18 +51,11 @@ public class BlogController {
 		}
 		return ResponseEntity.ok(services);
 	}
-
-
-	@GetMapping("/")
-	public List<BlogPostDTO> getBlogPosts() {
-		List<BlogPostDTO> postsDto = blogPostService.getBlogPosts();
-		return postsDto;
-	}
 	
 	
 	@GetMapping("/{id}")
 	public BlogPostDTO getBlogPost(@PathVariable Long id) {
-		BlogPostDTO postDto = blogPostService.getBlogPostById(id);
+		BlogPostDTO postDto = blogPostService.getById(id);
 		return postDto;
 	}
 	
@@ -90,7 +83,7 @@ public class BlogController {
 	@PostMapping("/")
 	@ResponseStatus(HttpStatus.CREATED)
 	public BlogPostDTO createBlogPost(@RequestBody BlogPostDTO postDto) {
-		BlogPostDTO newPostDto = blogPostService.createBlogPost(postDto);
+		BlogPostDTO newPostDto = blogPostService.create(postDto);
 		return newPostDto;
 	}
 	
@@ -98,7 +91,7 @@ public class BlogController {
 	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public BlogPostDTO updateBlogPost(@PathVariable Long id, @RequestBody BlogPostDTO postDto) {
-		BlogPostDTO updatedPostDto = blogPostService.updateBlogPost(id, postDto);
+		BlogPostDTO updatedPostDto = blogPostService.update(id, postDto);
 		return updatedPostDto;
 	}
 	
@@ -106,7 +99,7 @@ public class BlogController {
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteBlogPost(@PathVariable Long id) {
-		blogPostService.deleteBlogPostById(id);
+		blogPostService.delete(id);
 	}
 	
 }

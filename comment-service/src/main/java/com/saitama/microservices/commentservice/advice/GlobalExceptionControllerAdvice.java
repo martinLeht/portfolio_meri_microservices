@@ -1,4 +1,4 @@
-package com.saitama.microservices.portfoliodataservice.advice;
+package com.saitama.microservices.commentservice.advice;
 
 import java.util.Date;
 
