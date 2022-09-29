@@ -1,0 +1,9 @@
+#---------- ConfigMap --------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-data-service-cm
+data:
+ host: <POSTGRES_HOST_HERE>
+ #host: postgres.default FOR locally ruinning
+ db_name: <POSTGRES_DB_NAME_HERE>

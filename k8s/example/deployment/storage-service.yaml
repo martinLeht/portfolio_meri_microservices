@@ -1,0 +1,53 @@
+#---------- Service ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: storage-service
+  labels:
+    app: storage-service
+spec:
+  selector:
+    app: storage-service
+  ports:
+    - port: 80
+      targetPort: 8082
+  type: NodePort
+  
+---
+#---------- Deployment ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-service
+  labels:
+    app: storage-service
+spec:
+  selector:
+    matchLabels:
+      app: storage-service
+  template:
+    metadata:
+      labels:
+        app: storage-service
+    spec:
+      containers:
+        - name: storage-service
+          image: <CONTAINER_REGISTRY_HERE>/portfolio-storage-service:0.0.1-SNAPSHOT
+          ports:
+            - containerPort: 8082
+              protocol: TCP
+          env:
+            - name: GCP_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: storage-service-cm
+                  key: gcp_project_id
+            - name: GCP_STORAGE_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: storage-service-cm
+                  key: gcp_storage_key
+          imagePullPolicy: Always
+      imagePullSecrets:
+          - name: registry-secret
+      serviceAccountName: portfolio-microservices-service-account

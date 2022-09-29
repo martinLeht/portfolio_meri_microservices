@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-cm
+data:
+ host: <POSTGRES_HOST>
+ db_name: <POSTGRES_DB_NAME>

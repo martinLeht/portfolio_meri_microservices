@@ -1,0 +1,54 @@
+#---------- Service ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-service
+  labels:
+    app: blog-service
+spec:
+  selector:
+    app: blog-service
+  ports:
+    - port: 80
+      targetPort: 8081
+  type: NodePort
+  
+---
+#---------- Deployment ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blog-service
+  labels:
+    app: blog-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-service
+  template:
+    metadata:
+      labels:
+        app: blog-service
+    spec:
+      containers:
+        - name: blog-service
+          image: <CONTAINER_REGISTRY_HERE>/portfolio-blog-service:0.0.1-SNAPSHOT
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: blog-service-cm
+                  key: mongodb_uri
+            - name: MONGODB_CLUSTER
+              valueFrom:
+                configMapKeyRef:
+                  name: blog-service-cm
+                  key: mongodb_cluster
+          imagePullPolicy: Always
+      imagePullSecrets:
+          - name: registry-secret
+      serviceAccountName: portfolio-microservices-service-account

@@ -1,0 +1,8 @@
+#---------- ConfigMap --------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blog-service-cm
+data:
+  mongodb_uri: <MONGO_DB_URI_HERE>
+  mongodb_cluster: <MONGO_DB_CLUSTER_NAME_HERE>

@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: api-gateway
+      port:
+        number: 80
+  tls:
+  - hosts:
+    - api.saitamatest.com
+    secretName: letsencrypt-production
+  rules:
+   - host: api.saitamatest.com
+     http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 80
+                  

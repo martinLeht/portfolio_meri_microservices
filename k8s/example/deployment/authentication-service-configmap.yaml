@@ -1,0 +1,9 @@
+#---------- ConfigMap --------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentication-service-cm
+data:
+ host: <POSTGRES_HOST>
+ #host: postgres.default FOR locally ruinning
+ db_name: <POSTGRES_DB_NAME>

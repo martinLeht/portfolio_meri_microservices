@@ -1,0 +1,8 @@
+#---------- ConfigMap --------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-cm
+data:
+  #spring.cloud.kubernetes.discovery.all-namespaces: "true"
+  #spring.cloud.kubernetes.discovery.discovery-server-url: "http://spring-cloud-kubernetes-discoveryserver:8761"
