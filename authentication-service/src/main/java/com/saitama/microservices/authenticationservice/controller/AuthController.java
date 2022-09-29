@@ -32,14 +32,20 @@ public class AuthController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
 	
-	@Autowired
-	private IUserService userService;
+	private final IUserService userService;
+	private final IJwtService jwtService;
+	private final ModelMapper modelMapper;
 	
 	@Autowired
-	private IJwtService jwtService;
-	
-	@Autowired
-	private ModelMapper modelMapper;
+	public AuthController(
+			IUserService userService, 
+			IJwtService jwtService,
+			ModelMapper modelMapper
+	) {
+		this.userService = userService;
+		this.jwtService = jwtService;
+		this.modelMapper = modelMapper;
+	}
 
 	
 	@PostMapping("/login")

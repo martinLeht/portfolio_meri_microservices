@@ -1,6 +1,6 @@
 package com.saitama.microservices.authenticationservice.dto;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,12 +12,12 @@ public class UserDTO {
 	private String email;
 	private String username;
 	private Set<Role> authorities;
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 	
 	public UserDTO() {}
 
 
-	public UserDTO(UUID id, String email, String username, Set<Role> authorities, Timestamp createdAt) {
+	public UserDTO(UUID id, String email, String username, Set<Role> authorities, LocalDateTime createdAt) {
 		this.id = id;
 		this.email = email;
 		this.username = username;
@@ -66,12 +66,12 @@ public class UserDTO {
 	}
 
 
-	public Timestamp getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 

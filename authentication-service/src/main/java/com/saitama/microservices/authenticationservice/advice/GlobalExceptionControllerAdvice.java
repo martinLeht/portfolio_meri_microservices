@@ -15,7 +15,9 @@ import com.saitama.microservices.authenticationservice.exception.JwtTokenMissing
 import com.saitama.microservices.authenticationservice.exception.JwtTokenRefreshException;
 import com.saitama.microservices.authenticationservice.exception.RoleMissingException;
 import com.saitama.microservices.authenticationservice.exception.UserExistsException;
+import com.saitama.microservices.authenticationservice.exception.UserLockedException;
 import com.saitama.microservices.authenticationservice.exception.UserNotFoundException;
+import com.saitama.microservices.authenticationservice.exception.UserNotVerifiedException;
 
 @RestControllerAdvice
 public class GlobalExceptionControllerAdvice {
@@ -68,5 +70,19 @@ public class GlobalExceptionControllerAdvice {
 		ExceptionResponse exResponse= new ExceptionResponse(new Date(), ex.getMessage(),
 				req.getDescription(false));
 		return new ResponseEntity<ExceptionResponse>(exResponse, HttpStatus.FORBIDDEN);
+	}
+	
+	@ExceptionHandler(value = UserLockedException.class)
+	public ResponseEntity<ExceptionResponse> handleUserLockedException(UserLockedException ex, WebRequest req) {
+		ExceptionResponse exResponse= new ExceptionResponse(new Date(), ex.getMessage(),
+				req.getDescription(false));
+		return new ResponseEntity<ExceptionResponse>(exResponse, HttpStatus.I_AM_A_TEAPOT);
+	}
+	
+	@ExceptionHandler(value = UserNotVerifiedException.class)
+	public ResponseEntity<ExceptionResponse> handleUserNotVerifiedException(UserNotVerifiedException ex, WebRequest req) {
+		ExceptionResponse exResponse= new ExceptionResponse(new Date(), ex.getMessage(),
+				req.getDescription(false));
+		return new ResponseEntity<ExceptionResponse>(exResponse, HttpStatus.UNAUTHORIZED);
 	}
 }

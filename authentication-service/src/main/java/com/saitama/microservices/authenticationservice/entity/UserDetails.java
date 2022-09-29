@@ -1,6 +1,6 @@
 package com.saitama.microservices.authenticationservice.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -44,11 +44,11 @@ public class UserDetails {
 	
 	@Column(name = "created_at")
 	@CreationTimestamp
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 	
 	@Column(name = "updated_at")
 	@UpdateTimestamp
-	private Timestamp updatedAt;
+	private LocalDateTime updatedAt;
 	
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
@@ -68,7 +68,7 @@ public class UserDetails {
 	
 
 	public UserDetails(UUID id, String password, Integer loginAttempts, boolean verified, boolean locked,
-			boolean accountExpired, boolean credentialsExpired, Timestamp createdAt, Timestamp updatedAt) {
+			boolean accountExpired, boolean credentialsExpired, LocalDateTime createdAt, LocalDateTime updatedAt) {
 		this.id = id;
 		this.password = password;
 		this.loginAttempts = loginAttempts;
@@ -137,22 +137,22 @@ public class UserDetails {
 	}
 
 	
-	public Timestamp getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
 
-	public Timestamp getUpdatedAt() {
+	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
 	}
 
 
-	public void setUpdatedAt(Timestamp updatedAt) {
+	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

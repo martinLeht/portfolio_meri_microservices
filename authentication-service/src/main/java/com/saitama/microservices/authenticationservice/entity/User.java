@@ -1,6 +1,6 @@
 package com.saitama.microservices.authenticationservice.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -57,11 +57,11 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	
 	@Column(name = "created_at")
 	@CreationTimestamp
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 	
 	@Column(name = "updated_at")
 	@UpdateTimestamp
-	private Timestamp updatedAt;
+	private LocalDateTime updatedAt;
 	
 	@ManyToMany
 	@JoinTable(
@@ -88,7 +88,7 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	
 
 	public User(long id, UUID uuid, String email, String username, 
-				Timestamp createdAt, Timestamp updatedAt, Set<Role> authorities, JwtRefreshToken refreshToken) {
+				LocalDateTime createdAt, LocalDateTime updatedAt, Set<Role> authorities, JwtRefreshToken refreshToken) {
 		this.id = id;
 		this.uuid = uuid;
 		this.email = email;
@@ -130,22 +130,22 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	}
 
 
-	public Timestamp getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
 
-	public Timestamp getUpdatedAt() {
+	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
 	}
 
 
-	public void setUpdatedAt(Timestamp updatedAt) {
+	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 
