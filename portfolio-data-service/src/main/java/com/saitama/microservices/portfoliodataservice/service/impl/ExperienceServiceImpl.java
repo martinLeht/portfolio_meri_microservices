@@ -6,14 +6,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
 import com.saitama.microservices.commonlib.exception.EntityNotFoundException;
+import com.saitama.microservices.commonlib.util.QueryUtils;
 import com.saitama.microservices.portfoliodataservice.dto.ExperienceDTO;
 import com.saitama.microservices.portfoliodataservice.entity.Experience;
 import com.saitama.microservices.portfoliodataservice.entity.Media;
@@ -43,16 +42,7 @@ public class ExperienceServiceImpl implements IExperienceService {
 	
 	@Override
 	public PaginationDTO<ExperienceDTO> getPaginated(PageRequestDTO pageDto) {
-		Pageable sortedByCreatedAt = null;
-		if (pageDto == null || pageDto.getPage() == null || pageDto.getSize() == null) {
-			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
-		} else {
-			if (pageDto.getSize() > PageRequestDTO.MAX_SIZE) {
-				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), PageRequestDTO.MAX_SIZE, Sort.Direction.DESC, "createdAt");
-			} else {
-				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), pageDto.getSize(), Sort.Direction.DESC, "createdAt");
-			}
-		}
+		Pageable sortedByCreatedAt = QueryUtils.createPageRequestSortedByField("createdAt", pageDto);	
 		
 		Page<Experience> experiences = experienceRepository.findAll(sortedByCreatedAt);		
 		List<ExperienceDTO> experienceDtos = experiences.stream()
@@ -79,16 +69,7 @@ public class ExperienceServiceImpl implements IExperienceService {
 	
 	@Override
 	public PaginationDTO<ExperienceDTO> getPublicExperiences(PageRequestDTO pageDto) {
-		Pageable sortedByCreatedAt = null;
-		if (pageDto == null || pageDto.getPage() == null || pageDto.getSize() == null) {
-			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
-		} else {
-			if (pageDto.getSize() > PageRequestDTO.MAX_SIZE) {
-				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), PageRequestDTO.MAX_SIZE, Sort.Direction.DESC, "createdAt");
-			} else {
-				sortedByCreatedAt = PageRequest.of(pageDto.getPage(), pageDto.getSize(), Sort.Direction.DESC, "createdAt");
-			}
-		}
+		Pageable sortedByCreatedAt = QueryUtils.createPageRequestSortedByField("createdAt", pageDto);	
 		
 		Page<Experience> experiences = experienceRepository.findByHiddenWithPagination(false, sortedByCreatedAt);		
 		List<ExperienceDTO> experienceDtos = experiences.stream()

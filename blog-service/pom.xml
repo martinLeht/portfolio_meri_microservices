@@ -16,7 +16,7 @@
 	<description>Microservice to handle server-side functionality for a blog project</description>
 	<properties>
 		<java.version>11</java.version>
-		<spring-cloud.version>2021.0.3</spring-cloud.version>
+		<spring-cloud.version>2021.0.4</spring-cloud.version>
 		<springdoc-openapi.version>1.6.4</springdoc-openapi.version>
 		<repackage.classifier/>
 	</properties>

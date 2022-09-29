@@ -1,7 +1,7 @@
 package com.saitama.microservices.portfoliodataservice.entity;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -71,18 +71,18 @@ public class Experience {
 
 	@Column(name = "created_at")
 	@CreationTimestamp
-	private Timestamp createdAt;
+	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at")
 	@UpdateTimestamp
-	private Timestamp updatedAt;
+	private LocalDateTime updatedAt;
 
 	public Experience() {
 	}
 
 	public Experience(Long id, UUID uuid, UUID userId, ExperienceType experienceType, String title, boolean hidden,
 			String shortDescription, String content, LocalDate startDate, LocalDate endDate, Media media,
-			Timestamp createdAt, Timestamp updatedAt) {
+			LocalDateTime createdAt, LocalDateTime updatedAt) {
 		this.id = id;
 		this.uuid = uuid;
 		this.userId = userId;
@@ -186,19 +186,19 @@ public class Experience {
 		this.media = media;
 	}
 
-	public Timestamp getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
-	public Timestamp getUpdatedAt() {
+	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(Timestamp updatedAt) {
+	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

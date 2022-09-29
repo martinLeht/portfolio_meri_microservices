@@ -32,6 +32,7 @@
         <module>comment-service</module>
         <module>portfolio-data-service</module>
         <module>storage-service</module>
+        <module>email-service</module>
     </modules>
     
     <dependencyManagement>

@@ -82,27 +82,9 @@ services:
       kafka:
         condition: service_started
     environment:
-      SENDGRID_API_KEY: <SENDGRID_API_KEY_HERE>
-      EMAIL_ADDRESS_FROM: <VERIFIED_EMAIL_ADDRESS_HERE>
-      KAFKA_URL: http://kafka:9092
-       
-  comment-service:
-    build: ./comment-service
-    mem_limit: 700m
-    ports:
-      - "8088:8088"
-    networks:
-      - blog-platform-network
-    depends_on:
-      kafka:
-        condition: service_started
-      postgres:
-        condition: service_started
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_DATABASE: portfolio_microservices_db
-      POSTGRES_USER: testUser
-      POSTGRES_PASSWORD: testPass123   
+       SENDGRID_API_KEY: <SENDGRID_API_KEY_HERE>
+       EMAIL_ADDRESS_FROM: <VERIFIED_EMAIL_ADDRESS_HERE>
+       KAFKA_URL: http://kafka:9092
   
   postgres:
     image: postgres:15beta4
@@ -120,7 +102,6 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
-
   kafka:
     image: wurstmeister/kafka:latest
     ports:
