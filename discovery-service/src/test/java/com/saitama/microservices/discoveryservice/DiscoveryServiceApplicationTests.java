@@ -1,10 +1,10 @@
-package com.saitama.microservices.eurekanamingserver;
+package com.saitama.microservices.discoveryservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EurekaNamingServerApplicationTests {
+class DiscoveryServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

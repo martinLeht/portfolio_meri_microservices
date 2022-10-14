@@ -1,8 +1,8 @@
 version: '3.7'
 
 services:
-  naming-server:
-    image: 'eureka-naming-server:0.0.1-SNAPSHOT'
+  discovery-service:
+    build: ./discovery-service
     mem_limit: 700m
     ports:
       - "8761:8761"
@@ -16,11 +16,10 @@ services:
       - "8765:8765"
     networks:
       - blog-platform-network
-#    depends_on:
-#      - naming-server
-#    environment:
-#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
-#      EUREKA.CLIENT.FETCHREGISTRY: "true"
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
 
   authentication-service:
     build: ./authentication-service
@@ -32,44 +31,41 @@ services:
     depends_on:
       postgres:
         condition: service_started
+      kafka:
+        condition: service_started
+      discovery-service:
+        condition: service_started
     restart: on-failure
     environment:
       POSTGRES_HOST: postgres
-      POSTGRES_DATABASE: portfolio_microservices_db
+      POSTGRES_DATABASE: test_db
       POSTGRES_USER: testUser
       POSTGRES_PASSWORD: testPass123
-#      - naming-server
-#    restart: on-failure
-#    environment:
-#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
-#      EUREKA.CLIENT.FETCHREGISTRY: "true"
+      KAFKA_URL: kafka:9092
     
   storage-service:
-    image: 'storage-service:0.0.1-SNAPSHOT'
+    build: ./storage-service
     mem_limit: 700m
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
     ports:
       - "8200:8200"
     networks:
       - blog-platform-network
-#    depends_on:
-#      - naming-server
-#    environment:
-#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
-#      EUREKA.CLIENT.FETCHREGISTRY: "true"
 
   blog-service:
-    image: 'blog-service:0.0.1-SNAPSHOT'
     build: ./blog-service
     mem_limit: 700m
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
     ports:
       - "8100:8100"
     networks:
       - blog-platform-network
-#    depends_on:
-#      - naming-server
-#    environment:
-#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
-#      EUREKA.CLIENT.FETCHREGISTRY: "true"
 
   email-service:
     build: ./email-service
@@ -81,10 +77,49 @@ services:
     depends_on:
       kafka:
         condition: service_started
+      discovery-service:
+        condition: service_started
+    restart: on-failure
     environment:
-       SENDGRID_API_KEY: <SENDGRID_API_KEY_HERE>
-       EMAIL_ADDRESS_FROM: <VERIFIED_EMAIL_ADDRESS_HERE>
-       KAFKA_URL: http://kafka:9092
+      SENDGRID_API_KEY: <SENDGRID_API_KEY>
+      EMAIL_ADDRESS_FROM: <EMAIL_ADDRESS_FROM>
+      KAFKA_URL: kafka:29092
+       
+  comment-service:
+    build: ./comment-service
+    mem_limit: 700m
+    ports:
+      - "8088:8088"
+    networks:
+      - blog-platform-network
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_started
+      discovery-service:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: test_db
+      POSTGRES_USER: testUser
+      POSTGRES_PASSWORD: testPass123
+
+  portfolio-data-service:
+    build: ./portfolio-data-service
+    mem_limit: 700m
+    ports:
+      - "8084:8084"
+    networks:
+      - blog-platform-network
+    depends_on:
+      postgres:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: test_db
+      POSTGRES_USER: testUser
+      POSTGRES_PASSWORD: testPass123
   
   postgres:
     image: postgres:15beta4
@@ -94,7 +129,7 @@ services:
     networks:
       - blog-platform-network
     environment:
-      POSTGRES_DB: portfolio_microservices_db
+      POSTGRES_DB: test_db
       POSTGRES_USER: testUser
       POSTGRES_PASSWORD: testPass123
 
@@ -102,16 +137,40 @@ services:
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
+    networks:
+      - blog-platform-network
+
   kafka:
     image: wurstmeister/kafka:latest
     ports:
       - "9092:9092"
+    expose:
+      - "29092"
     depends_on:
       zookeeper:
         condition: service_started
+    networks:
+      - blog-platform-network
     environment:
       DOCKER_API_VERSION: 1.41
-      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    restart: always
+    networks:
+      - blog-platform-network
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=localhost:2181
+
 networks:
   blog-platform-network:

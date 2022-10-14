@@ -18,6 +18,88 @@
 		<spring-cloud.version>2021.0.4</spring-cloud.version>
 		<repackage.classifier/>
 	</properties>
+	
+	<profiles>
+	    <profile>
+	        <id>local</id>
+	        <properties>
+		        <activatedProfile>local</activatedProfile>
+		    </properties>
+		    <activation>
+		        <activeByDefault>true</activeByDefault>
+		    </activation>
+	        <dependencies>				
+				<!-- For discovery through eureka service discovery -->
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+				</dependency>
+				
+				
+				<!-- For Zipkin distributed tracing (debugging)
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-sleuth</artifactId>
+				</dependency>
+				
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+				</dependency>
+				
+				<dependency>
+					<groupId>org.springframework.amqp</groupId>
+					<artifactId>spring-rabbit</artifactId>
+				</dependency>
+				 -->
+	        </dependencies>
+	    </profile>
+	    <profile>
+	        <id>dev</id>
+	        <properties>
+		        <activatedProfile>dev</activatedProfile>
+		    </properties>
+	        <dependencies>				
+				<!-- For discovery through eureka service discovery -->
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+				</dependency>
+				
+				
+				<!-- For Zipkin distributed tracing (debugging)
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-sleuth</artifactId>
+				</dependency>
+				
+				<dependency>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+				</dependency>
+				
+				<dependency>
+					<groupId>org.springframework.amqp</groupId>
+					<artifactId>spring-rabbit</artifactId>
+				</dependency>
+				 -->
+	        </dependencies>
+	    </profile>
+	    <profile>
+	        <id>prod</id>
+	        <properties>
+		        <activatedProfile>prod</activatedProfile>
+		    </properties>
+	        <dependencies>
+	            <dependency>
+		            <groupId>org.springframework.cloud</groupId>
+		            <artifactId>spring-cloud-kubernetes-client-discovery</artifactId>
+		        </dependency>
+	        </dependencies>
+	    </profile>
+	</profiles>
+	
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -33,11 +115,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
-		
-		<dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-kubernetes-client-discovery</artifactId>
-        </dependency>
 		
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
@@ -68,30 +145,6 @@
 			<version>0.9.1</version>
 		</dependency>
 		
-		<!-- For discovery through eureka service discovery
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
-		-->
-		
-		<!-- For Zipkin distributed tracing
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.amqp</groupId>
-			<artifactId>spring-rabbit</artifactId>
-		</dependency>
-		-->
-		
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -106,6 +159,12 @@
 	</dependencyManagement>
 
 	<build>
+		<resources>
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering>
+	        </resource>
+	    </resources>
 		<plugins>			
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

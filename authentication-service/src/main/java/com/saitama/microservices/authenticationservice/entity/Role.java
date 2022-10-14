@@ -16,11 +16,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "role")
-public class Role implements GrantedAuthority {
+public class Role /*implements GrantedAuthority*/ {
 
 	/**
 	 * 
@@ -70,7 +69,7 @@ public class Role implements GrantedAuthority {
 		this.id = id;
 	}
 
-	@Override
+	
 	public String getAuthority() {
 		return this.authority.name();
 	}

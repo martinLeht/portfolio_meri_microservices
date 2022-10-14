@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name="auth_user")
-public class User implements org.springframework.security.core.userdetails.UserDetails {
+public class User /*implements org.springframework.security.core.userdetails.UserDetails*/ {
 	
 	/**
 	 * 
@@ -190,20 +190,17 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	}
 
 
-	@Override
 	public Set<Role> getAuthorities() {
 		return authorities;
 	}
 
 
-	@Override
 	@JsonIgnore
 	public String getPassword() {
 		return userDetails.getPassword();
 	}
 	
 
-	@Override
 	public String getUsername() {
 		return username;
 	}
@@ -213,25 +210,21 @@ public class User implements org.springframework.security.core.userdetails.UserD
 	}
 
 
-	@Override
 	public boolean isAccountNonExpired() {
 		return userDetails.isAccountNonExpired();
 	}
 
 
-	@Override
 	public boolean isAccountNonLocked() {
 		return userDetails.isAccountNonLocked();
 	}
 
 
-	@Override
 	public boolean isCredentialsNonExpired() {
 		return userDetails.isCredentialsNonExpired();
 	}
 
 
-	@Override
 	public boolean isEnabled() {
 		return userDetails.isVerified();
 	}

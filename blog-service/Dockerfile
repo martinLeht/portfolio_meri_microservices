@@ -18,4 +18,4 @@ WORKDIR /microservices/blog-service/app
 # cp target/blog-service-0.0.1-SNAPSHOT.jar --> /microservices/blog-service/app/blog-service.jar
 COPY ${JAR_FILE} blog-service.jar
 # Run java -jar /microservices/blog-service/app/blog-service.jar
-ENTRYPOINT ["java", "-jar", "blog-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "blog-service.jar"]

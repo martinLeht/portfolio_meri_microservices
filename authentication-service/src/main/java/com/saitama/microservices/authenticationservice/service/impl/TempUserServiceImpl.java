@@ -5,18 +5,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.saitama.microservices.authenticationservice.constant.AccessType;
 import com.saitama.microservices.authenticationservice.dto.AccessKeyDTO;
 import com.saitama.microservices.authenticationservice.dto.AccessVerificationDTO;
 import com.saitama.microservices.authenticationservice.dto.TempUserDTO;
 import com.saitama.microservices.authenticationservice.entity.AccessKey;
 import com.saitama.microservices.authenticationservice.entity.TempUser;
+import com.saitama.microservices.authenticationservice.exception.UserExistsException;
 import com.saitama.microservices.authenticationservice.exception.UserLockedException;
 import com.saitama.microservices.authenticationservice.exception.UserNotVerifiedException;
 import com.saitama.microservices.authenticationservice.mapper.TempUserMapper;
@@ -71,19 +73,17 @@ public class TempUserServiceImpl implements ITempUserService {
 
 	@Override
 	public TempUserDTO create(TempUserDTO dto) {
+		List<TempUser> existingUsers = tempUserRepository.findByUuid(dto.getUuid());
+		
+		if (existingUsers.size() > 0) {
+			throw new UserExistsException("Temporary user already exists");
+		}
+		
 		TempUser newTempUser = new TempUser();
+		newTempUser.setUuid(dto.getUuid());
 		newTempUser.setUsername(dto.getUsername());
 		newTempUser.setVerified(false);
 		newTempUser.setLocked(false);
-		
-		UUID uuid = UUID.randomUUID();
-		List<TempUser> existingUsers = tempUserRepository.findByUuid(uuid);
-		
-		if (existingUsers.isEmpty()) {
-			newTempUser.setUuid(uuid);
-		} else {
-			newTempUser.setUuid(UUID.randomUUID());
-		}
 		
 		TempUser saved = tempUserRepository.save(newTempUser);
 		
@@ -104,9 +104,9 @@ public class TempUserServiceImpl implements ITempUserService {
 
 	@Override
 	public TempUserDTO verifyUserAccess(AccessVerificationDTO accessVerificationDto) {
+		LOG.info("Verifying temporary user access"); 
 		
 		UUID generatedUuid = UuidUtils.generateType5UUID(accessVerificationDto.getEmail(), encryptionSalt);
-		
 		Optional<TempUser> tempUserOpt = tempUserRepository.findByUuid(generatedUuid).stream().findFirst();
 		
 		if (tempUserOpt.isPresent()) {
@@ -117,35 +117,41 @@ public class TempUserServiceImpl implements ITempUserService {
 				throw new UserLockedException("User is locked");
 			} else if (!tempUser.isVerified()) {
 				// TODO: Send email verification and throw use is not verified (401)
-				
-				AccessKey accessToken = createAccessKeyForUser(tempUser);
-				
-				MessageDTO verificationMessageDto = MessageDTO.builder()
-						.to(accessVerificationDto.getEmail())
-						.subject("Temporary user verification")
-						.content("Verify temporary user access by clicking the link: <URL> "
-								+ "\n\nAfter successful verification, you will be authorized to leave comments on the blog section."
-								+ "\nNOTE: Verified access will expire after 30 days of inactivity in the platform. "
-								+ "After expiration you will need to verify the access again.")
-						.createdAt(LocalDateTime.now())
-						.build();
-				
-				kafkaMessagingClient.sendMessageToChannel(EventType.EMAIL_EVENT, verificationMessageDto);
-				throw new UserNotVerifiedException("User is not verified, check email for latest verification link");
+				LOG.info("User is not verified, uuid: {}", generatedUuid.toString());
+				if (tempUser.getAccessKey() != null) {
+					LOG.info("User already has a access token with uuid key: " + tempUser.getAccessKey().toString());
+					return null;
+				} else {
+					AccessKey accessToken = createAccessKeyForUser(tempUser);
+					
+					MessageDTO verificationMessageDto = MessageDTO.builder()
+							.to(accessVerificationDto.getEmail())
+							.subject("Temporary user verification")
+							.content("Verify temporary user access by clicking the link: <URL> " + accessToken.getAccessKey().toString()
+									+ "\n\nAfter successful verification, you will be authorized to leave comments on the blog section."
+									+ "\nNOTE: Verified access will expire after 30 days of inactivity in the platform. "
+									+ "After expiration you will need to verify the access again.")
+							.createdAt(LocalDateTime.now())
+							.build();
+					
+					kafkaMessagingClient.sendMessageToChannel(EventType.EMAIL_EVENT, verificationMessageDto);
+					throw new UserNotVerifiedException("User is not verified, check email for latest verification link");
+				}
 			} else {
+				LOG.info("User is verified, uuid: {}", generatedUuid.toString());
 				return tempUserMapper.toDto(tempUser);
 			}
 		} else {
 			// TODO: Create temporary user, send email verification link.
-			
 			String username;
-			if (StringUtils.isBlank(accessVerificationDto.getUsername())) {
+			if (accessVerificationDto.getUsername() == null || accessVerificationDto.getUsername().isBlank()) {
 				username= accessVerificationDto.getEmail().split("@")[0];
 			} else {
 				username = accessVerificationDto.getUsername();
 			}
 			
 			TempUserDTO tempUserDto = TempUserDTO.builder()
+					.uuid(generatedUuid)
 					.username(username)
 					.build();
 			
@@ -156,7 +162,9 @@ public class TempUserServiceImpl implements ITempUserService {
 	private AccessKey createAccessKeyForUser(TempUser user) {
 		AccessKey newAccessKey = new AccessKey();
 		
+		/*
 		UUID accessKeyValue = UUID.randomUUID();
+		
 		List<AccessKey> existingKeys = accessKeyRepository.findByAccessKey(accessKeyValue);
 		
 		if (existingKeys.isEmpty()) {
@@ -164,6 +172,9 @@ public class TempUserServiceImpl implements ITempUserService {
 		} else {
 			newAccessKey.setAccessKey(UUID.randomUUID());
 		}
+		*/
+		newAccessKey.setAccessKey(UUID.randomUUID());
+		newAccessKey.setType(AccessType.TEMPORARY);
 		newAccessKey.setUser(user);
 		user.setAccessKey(newAccessKey);
 		

@@ -18,4 +18,4 @@ WORKDIR /microservices/naming-server/app
 # cp target/storage-service-0.0.1-SNAPSHOT.jar --> /microservices/storage-service/app/storage-service.jar
 COPY ${JAR_FILE} storage-service.jar
 # Run java -jar /microservices/storage-service/app/image-service.jar
-ENTRYPOINT ["java", "-jar", "storage-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "storage-service.jar"]

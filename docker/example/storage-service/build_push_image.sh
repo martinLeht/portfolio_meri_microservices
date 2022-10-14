@@ -26,7 +26,7 @@ build_image ()
 	mvn clean spring-boot:build-image -DskipTests
 	
 	echo "All image built!"
-	cd "../scripts"
+	cd "../docker"
 }
 
 push_image_to_registry ()

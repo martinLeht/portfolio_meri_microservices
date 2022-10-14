@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,12 +40,13 @@ public class UserServiceImpl implements IUserService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	
+	/*
 	@Override
-	public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public User loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<User> userOpt = this.userRepository.findByUsername(username);
 		return userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found by username: " + username));
 	}
+	*/
 
 
 	@Override

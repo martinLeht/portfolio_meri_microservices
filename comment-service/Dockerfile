@@ -18,4 +18,4 @@ WORKDIR /microservices/comment-service/app
 # cp target/comment-service-0.0.1-SNAPSHOT-exec.jar --> /microservices/comment-service/app/comment-service.jar
 COPY ${JAR_FILE} comment-service.jar
 # Run java -jar /microservices/comment-service/app/comment-service.jar
-ENTRYPOINT ["java", "-jar", "comment-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "comment-service.jar"]

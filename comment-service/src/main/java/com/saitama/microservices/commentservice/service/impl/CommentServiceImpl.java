@@ -110,7 +110,6 @@ public class CommentServiceImpl implements ICommentService {
 	@Override
 	public CommentDTO create(CommentDTO commentDto) {
 		
-		
 		Comment comment = commentMapper.fromDto(commentDto);
 		
 		UUID uuid = UUID.randomUUID();

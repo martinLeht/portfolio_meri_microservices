@@ -14,12 +14,13 @@ import com.saitama.microservices.commentservice.entity.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 	
+	//@Query("SELECT c FROM Comment c WHERE c.postId=?1 AND c.verified=?2")
 	Page<Comment> findByPostIdAndVerified(UUID postId, boolean isVerified, Pageable pageable);
 	
 	@Query(value="SELECT * FROM comment c WHERE c.parent_id=?1 AND c.verified=?2", nativeQuery=true)
     Page<Comment> findCommentsByParentIdAndVerifiedWithPagination(String parentId, boolean isVerified, Pageable pageable);
 	
-	@Query("SELECT e FROM Experience e WHERE e.hidden=?1")
+	@Query("SELECT c FROM Comment c WHERE c.verified=?1")
     Page<Comment> findByVerifiedWithPagination(boolean isHidden, Pageable pageable);
 	
 	List<Comment> findByUuid(UUID uuid);

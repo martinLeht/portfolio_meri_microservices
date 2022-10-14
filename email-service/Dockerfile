@@ -18,4 +18,4 @@ WORKDIR /microservices/email-service/app
 # cp target/email-service-0.0.1-SNAPSHOT-exec.jar --> /microservices/email-service/app/email-service.jar
 COPY ${JAR_FILE} email-service.jar
 # Run java -jar /microservices/email-service/app/email-service.jar
-ENTRYPOINT ["java", "-jar", "email-service.jar"]
+ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "email-service.jar"]

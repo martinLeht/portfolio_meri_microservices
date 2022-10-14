@@ -3,6 +3,7 @@ package com.saitama.microservices.authenticationservice.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -58,7 +59,7 @@ public class AccessKey {
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.LAZY)
 	@JoinColumn(name="user_id", referencedColumnName = "id")
 	private TempUser user;
 }
