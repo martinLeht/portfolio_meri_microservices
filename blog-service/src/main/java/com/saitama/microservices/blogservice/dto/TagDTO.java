@@ -16,8 +16,13 @@ import lombok.NoArgsConstructor;
 public class TagDTO {
 	
 	private long id;
+	
 	private String postTitle;
+	
 	private String postIntro;
+	
+	private String contentFlat;
+	
 	private AttachmentDTO thumbnail;
 	
 	@JsonFormat(pattern="dd.MM.yyyy HH:mm")

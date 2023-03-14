@@ -1,6 +1,8 @@
 package com.saitama.microservices.authenticationservice.controller;
 
+/*
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -9,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +30,8 @@ import com.saitama.microservices.authenticationservice.exception.JwtTokenRefresh
 import com.saitama.microservices.authenticationservice.service.IJwtService;
 import com.saitama.microservices.authenticationservice.service.IUserService;
 
-@RestController
-@RequestMapping("/auth")
+//@RestController
+//@RequestMapping("/auth")
 public class AuthController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
@@ -48,7 +52,7 @@ public class AuthController {
 	}
 
 	
-	@PostMapping("/login")
+	//@PostMapping("/login")
 	public ResponseEntity<JwtDTO> login(@RequestBody LoginDTO loginDto) {
 		User authenticatedUser = userService.authenticateUser(loginDto);
 		if (authenticatedUser != null) {
@@ -56,13 +60,13 @@ public class AuthController {
 			Set<Authority> authorities = authenticatedUser.getAuthorities().stream().map(Role::getAuthorityEnum).collect(Collectors.toSet());
 			String accessToken = jwtService.getJwtToken(authenticatedUser.getUsername(), authenticatedUser.getUuid().toString(), authorities);
 			JwtRefreshToken refreshToken = jwtService.getRefreshToken(authenticatedUser.getUuid().toString());
-			return new ResponseEntity<JwtDTO>(new JwtDTO(accessToken, refreshToken.getToken()), HttpStatus.OK);
+			return ResponseEntity.ok(new JwtDTO(accessToken, refreshToken.getToken()));
 		} else {
 			return new ResponseEntity<JwtDTO>(new JwtDTO(), HttpStatus.UNAUTHORIZED);
 		}
 	}
 	
-	@PostMapping("/token/refresh")
+	//@PostMapping("/token/refresh")
 	public ResponseEntity<JwtDTO> refreshToken(@RequestBody JwtDTO jwtDto) {
 		String refreshToken = jwtDto.getRefreshToken();					
 		
@@ -77,13 +81,19 @@ public class AuthController {
 				.orElseThrow(() -> new JwtTokenRefreshException(refreshToken, "Refresh token missing!"));
 	}
 	
-	@PostMapping("/register")
+	//@PostMapping("/register")
 	public ResponseEntity<UserDTO> register(@RequestBody RegisterDTO registerDto) {
-		/* Save user */
+		// Save user 
 		User newUser = userService.registerUser(registerDto);
 		
-		UserDTO newUserDto = mapUserToDto(newUser);
-		return new ResponseEntity<UserDTO>(newUserDto, HttpStatus.OK);
+		return ResponseEntity.ok(mapUserToDto(newUser));
+	}
+	
+	//@GetMapping("/user/{uuid}")
+	public ResponseEntity<UserDTO> getUserByUuid(@PathVariable String uuid) {
+		User user = userService.getUserByUuid(UUID.fromString(uuid));
+		
+		return ResponseEntity.ok(mapUserToDto(user));
 	}
 	
 	private User mapUserDtoToEntity(UserDTO userDto) {
@@ -96,3 +106,4 @@ public class AuthController {
 		return userDto;
 	}
 }
+*/

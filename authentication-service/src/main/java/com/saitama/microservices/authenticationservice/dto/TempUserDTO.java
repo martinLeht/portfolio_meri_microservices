@@ -23,12 +23,20 @@ public class TempUserDTO {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private UUID uuid;
 	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private UUID accessUuid;
+	
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String keycloakUserId;
+	
 	@NotNull
 	private String username;
 	
 	private boolean verified;
 	
 	private boolean locked;
+	
+	private boolean requireVerificationOnEveryAccess;
 	
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	private LocalDateTime verifiedAt;

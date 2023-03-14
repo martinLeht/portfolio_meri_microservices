@@ -21,8 +21,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@JsonIgnoreProperties(value = { "id" })
 public class Comment {
 
 	@Id
@@ -34,10 +36,13 @@ public class Comment {
 	@Column(nullable = false, updatable = false, unique = true)
 	private UUID uuid;
 
-	@Column(nullable = false, updatable = false, unique = true)
+	@Column(nullable = false, updatable = false)
 	private UUID userId;
+	
+	@Column(nullable = false)
+	private String username;
 
-	@Column(nullable = false, updatable = false, unique = true)
+	@Column(nullable = false)
 	private UUID postId;
 
 	@Column
@@ -86,6 +91,15 @@ public class Comment {
 
 	public void setUserId(UUID userId) {
 		this.userId = userId;
+	}
+	
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public UUID getPostId() {

@@ -1,7 +1,6 @@
 package com.saitama.microservices.authenticationservice.dto;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +12,11 @@ import lombok.NoArgsConstructor;
 public class AccessVerificationDTO {
 	
 	@NotEmpty
-	@Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
-	private String email;
+	private String userId;
 	
-	private String username;
+	@NotEmpty
+	private String verificationToken;
+	
+	private String callbackUrl;
 
 }

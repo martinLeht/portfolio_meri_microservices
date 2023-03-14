@@ -17,8 +17,10 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>2021.0.4</spring-cloud.version>
-		<flyway-core.version>8.0.0</flyway-core.version>
-		<flyway-mvn-plugin.version>8.0.0</flyway-mvn-plugin.version>
+		<keycloak-client.version>12.0.4</keycloak-client.version>
+		<spring-security.version>5.7.3</spring-security.version>
+		<apache-common.version>3.12.0</apache-common.version>
+		<sendgrid-java.version>4.0.1</sendgrid-java.version>
 		<repackage.classifier/>
 	</properties>
 	
@@ -109,16 +111,30 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		
-		<!-- -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>${apache-common.version}</version>
+		</dependency>
+		
+		<!--
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		-->
+		<!-- -->
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-crypto</artifactId>
+		    <version>${spring-security.version}</version>
+		</dependency>
 		
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
+	        <groupId>org.springframework.security</groupId>
+	        <artifactId>spring-security-core</artifactId>
+	        <version>${spring-security.version}</version>
+      	</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -129,11 +145,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-        
-        <dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-openfeign</artifactId>
+	
+		<dependency>
+		      <groupId>org.keycloak</groupId>
+		      <artifactId>keycloak-admin-client</artifactId>
+		      <version>${keycloak-client.version}</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -161,13 +179,6 @@
 			<scope>test</scope>
 		</dependency>
 		
-		
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -186,11 +197,16 @@
 		</dependency>
 		
 		<dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway-core.version}</version>
-        </dependency>
-        
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sendgrid</groupId>
+			<artifactId>sendgrid-java</artifactId>
+			<version>${sendgrid-java.version}</version>
+		</dependency>
+		
         <dependency>
 			<groupId>com.saitama.microservices</groupId>
 			<artifactId>common-lib</artifactId>
@@ -243,12 +259,6 @@
 					</execution>                   
 				</executions> 
 	        </plugin>
-	        
-	        <plugin>
-			    <groupId>org.flywaydb</groupId>
-			    <artifactId>flyway-maven-plugin</artifactId>
-			    <version>${flyway-mvn-plugin.version}</version> 
-			</plugin>
 		</plugins>
 	</build>
 </project>

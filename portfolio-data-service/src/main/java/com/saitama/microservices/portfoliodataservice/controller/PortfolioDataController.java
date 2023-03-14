@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,12 +38,20 @@ public class PortfolioDataController {
 	
 	
 	@GetMapping("/experience")
-	public PaginationDTO<ExperienceDTO> getExperiences(@RequestBody(required = false) PageRequestDTO pageDto) {
+	public PaginationDTO<ExperienceDTO> getExperiences(@RequestParam Integer page, @RequestParam Integer size) {
+		PageRequestDTO pageDto = PageRequestDTO.builder()
+				.page(page != null ? page : PageRequestDTO.DEFAULT_PAGE)
+				.size(size != null ? size : PageRequestDTO.DEFAULT_SIZE)
+				.build();
 		return experienceService.getPaginated(pageDto);
 	}
 	
 	@GetMapping("/experience/public")
-	public PaginationDTO<ExperienceDTO> getPublicExperiences(@RequestBody(required = false) PageRequestDTO pageDto) {
+	public PaginationDTO<ExperienceDTO> getPublicExperiences(@RequestParam Integer page, @RequestParam Integer size) {
+		PageRequestDTO pageDto = PageRequestDTO.builder()
+				.page(page != null ? page : PageRequestDTO.DEFAULT_PAGE)
+				.size(size != null ? size : PageRequestDTO.DEFAULT_SIZE)
+				.build();
 		return experienceService.getPublicExperiences(pageDto);
 	}
 	

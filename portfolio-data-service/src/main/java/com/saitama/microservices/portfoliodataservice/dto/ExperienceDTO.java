@@ -1,6 +1,7 @@
 package com.saitama.microservices.portfoliodataservice.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.validation.constraints.NotEmpty;
@@ -45,8 +46,13 @@ public class ExperienceDTO {
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate endDate;
 	
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	private LocalDateTime createdAt;
+	
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	private LocalDateTime updatedAt;
+	
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private MediaFileDTO media;
-	
 
 }

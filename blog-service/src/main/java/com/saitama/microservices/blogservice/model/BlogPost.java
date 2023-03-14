@@ -22,6 +22,8 @@ public class BlogPost implements Persistable<Long> {
 	@Id
 	private long id;
 	
+	private String uuid;
+	
 	private String title;
 	
 	@CreatedDate
@@ -44,9 +46,10 @@ public class BlogPost implements Persistable<Long> {
 	}
 
 
-	public BlogPost(long id, String title, LocalDateTime createdAt, LocalDateTime updatedAt, List<ContentBlock> content, 
+	public BlogPost(long id, String uuid, String title, LocalDateTime createdAt, LocalDateTime updatedAt, List<ContentBlock> content, 
 			List<Attachment> attachments, String userId) {
 		this.id = id;
+		this.uuid = uuid;
 		this.title = title;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
@@ -66,6 +69,14 @@ public class BlogPost implements Persistable<Long> {
 		this.id = id;
 	}
 
+	public String getUuid() {
+		return uuid;
+	}
+
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public String getTitle() {
 		return title;
@@ -149,6 +160,7 @@ public class BlogPost implements Persistable<Long> {
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		result = prime * result + ((updatedAt == null) ? 0 : updatedAt.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
 		return result;
 	}
 
@@ -196,17 +208,19 @@ public class BlogPost implements Persistable<Long> {
 				return false;
 		} else if (!userId.equals(other.userId))
 			return false;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
 		return true;
 	}
 
 
 	@Override
 	public String toString() {
-		return "BlogPost [id=" + id + ", title=" + title + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-				+ ", persisted=" + persisted + ", content=" + content + ", attachments=" + attachments + ", userId="
-				+ userId + "]";
+		return "BlogPost [id=" + id + ", uuid=" + uuid + ", title=" + title + ", createdAt=" + createdAt
+				+ ", updatedAt=" + updatedAt + ", persisted=" + persisted + ", content=" + content + ", attachments="
+				+ attachments + ", userId=" + userId + "]";
 	}
-
-	
-	
 }

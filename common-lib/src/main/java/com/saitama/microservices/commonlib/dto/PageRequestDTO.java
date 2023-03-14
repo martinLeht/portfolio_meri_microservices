@@ -1,15 +1,19 @@
 package com.saitama.microservices.commonlib.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
+@Getter
+@Builder
+@AllArgsConstructor
 public class PageRequestDTO {
 
-	public static Integer MAX_SIZE = 100;
-	public static Integer DEFAULT_SIZE = 20;
-	public static Integer DEFAULT_PAGE = 0;
+	public static final Integer MAX_SIZE = 100;
+	public static final Integer DEFAULT_SIZE = 20;
+	public static final Integer DEFAULT_PAGE = 0;
 	
-	private Integer page;
-	private Integer size;
+	private final Integer page;
+	private final Integer size;
 	
 }

@@ -19,6 +19,8 @@ public class BlogPostDTO {
 	
 	private long id;
 	
+	private String uuid;
+	
 	private String title;
 	
 	@JsonFormat(pattern="dd.MM.yyyy HH:mm")

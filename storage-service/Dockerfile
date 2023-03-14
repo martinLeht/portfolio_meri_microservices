@@ -12,10 +12,10 @@
 #
 FROM adoptopenjdk:11-jre-hotspot as builder
 # Maven build JAR name
-ARG JAR_FILE=target/storage-service-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=target/storage-service-0.0.1-SNAPSHOT-exec.jar
 # cd /microservices/storage-service/app
-WORKDIR /microservices/naming-server/app
-# cp target/storage-service-0.0.1-SNAPSHOT.jar --> /microservices/storage-service/app/storage-service.jar
+WORKDIR /microservices/storage-service/app
+# cp target/storage-service-0.0.1-SNAPSHOT-exec.jar --> /microservices/storage-service/app/storage-service.jar
 COPY ${JAR_FILE} storage-service.jar
 # Run java -jar /microservices/storage-service/app/image-service.jar
 ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "storage-service.jar"]

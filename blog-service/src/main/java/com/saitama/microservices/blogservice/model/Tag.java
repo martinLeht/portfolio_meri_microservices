@@ -9,8 +9,19 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Document(collection="tag")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@JsonIgnoreProperties(value = { "persisted" })
 public class Tag implements Persistable<Long>, Comparable<Tag> {
 	
 	@Transient
@@ -18,87 +29,17 @@ public class Tag implements Persistable<Long>, Comparable<Tag> {
 
 	@Id
 	private long id;
-	
 	private String postTitle;
-	
 	private String postIntro;
-	
+	private String contentFlat;
 	private Attachment thumbnail;
+	private long postId;
+	private String userId;
+	private boolean persisted;
 	
 	@CreatedDate
 	private LocalDateTime createdAt;
 
-	private long postId;
-	
-	private String userId;
-	
-	private boolean persisted;
-	
-	public Tag() { }
-
-	public Tag(long id, String postTitle, String postIntro, Attachment thumbnail, LocalDateTime createdAt , long postId, String userId) {
-		super();
-		this.id = id;
-		this.postTitle = postTitle;
-		this.postIntro = postIntro;
-		this.thumbnail = thumbnail;
-		this.createdAt = createdAt;
-		this.postId = postId;
-		this.userId = userId;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public String getPostTitle() {
-		return postTitle;
-	}
-
-	public void setPostTitle(String postTitle) {
-		this.postTitle = postTitle;
-	}
-
-	public String getPostIntro() {
-		return postIntro;
-	}
-
-	public void setPostIntro(String postIntro) {
-		this.postIntro = postIntro;
-	}
-
-	public Attachment getThumbnail() {
-		return thumbnail;
-	}
-
-	public void setThumbnail(Attachment thumbnail) {
-		this.thumbnail = thumbnail;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	
-	public long getPostId() {
-		return postId;
-	}
-
-	public void setPostId(long postId) {
-		this.postId = postId;
-	}
-	
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
 
 	@Override
 	public int compareTo(Tag tag) {
@@ -115,11 +56,4 @@ public class Tag implements Persistable<Long>, Comparable<Tag> {
 	public boolean isNew() {
 		return !persisted;
 	}
-	
-	public void setPersisted(boolean persisted) {
-		this.persisted = persisted;
-	}
-	
-	
-	
 }

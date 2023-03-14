@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saitama.microservices.blogservice.dto.AttachmentDTO;
 import com.saitama.microservices.blogservice.dto.BlogPostDTO;
 import com.saitama.microservices.blogservice.dto.TagDTO;
+import com.saitama.microservices.blogservice.mapper.TagMapper;
 import com.saitama.microservices.blogservice.model.Attachment;
 import com.saitama.microservices.blogservice.model.BlogPost;
 import com.saitama.microservices.blogservice.model.ContentBlock;
@@ -34,6 +36,9 @@ import com.saitama.microservices.commonlib.dto.MediaListQueryDTO;
 import com.saitama.microservices.commonlib.dto.MediaQueryDTO;
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
+import com.saitama.microservices.commonlib.dto.SearchRequestDTO;
+import com.saitama.microservices.commonlib.exception.EntityNotFoundException;
+import com.saitama.microservices.commonlib.util.UuidUtils;
 
 @Service
 public class BlogPostServiceImpl implements IBlogPostService {
@@ -45,17 +50,19 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	private final BlogPostRepository blogPostRepository;
 	private final ISequenceGeneratorService sequenceGenService;
 	private final TagRepository tagRepository;
+	private final TagMapper tagMapper;
 	private final ObjectMapper mapper;
 	
 	
 	@Autowired
 	public BlogPostServiceImpl(MongoQueryHelper queryHelper, StorageServiceProxy storageServiceProxy, BlogPostRepository blogPostRepository,
-			ISequenceGeneratorService sequenceGenService, TagRepository tagRepository, ObjectMapper mapper) {
+			ISequenceGeneratorService sequenceGenService, TagRepository tagRepository, TagMapper tagMapper, ObjectMapper mapper) {
 		this.queryHelper = queryHelper;
 		this.storageServiceProxy = storageServiceProxy;
 		this.blogPostRepository = blogPostRepository;
 		this.sequenceGenService = sequenceGenService;
 		this.tagRepository = tagRepository;
+		this.tagMapper = tagMapper;
 		this.mapper = mapper;
 	}
 	
@@ -70,12 +77,9 @@ public class BlogPostServiceImpl implements IBlogPostService {
 
 	@Override
 	public BlogPostDTO getById(Long id) {
-		Optional<BlogPost> blogPostOpt = blogPostRepository.findById(id);
-		if (blogPostOpt.isPresent()) {
-			BlogPost blogPost = blogPostOpt.get();			
-			return convertBlogPostToDto(blogPost);
-		}
-		return null;
+		BlogPost blogPost = blogPostRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("blog-post-not-found", "Blog post not found with id: " + id));	
+		return convertBlogPostToDto(blogPost);
 	}
 
 	
@@ -94,24 +98,50 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		}
 		tags = tagRepository.findAll(sortedByCreatedAt);		
 		
-		List<TagDTO> tagDtos = tags.stream()
-				.map(this::convertTagToDto)
-				.collect(Collectors.toList());
+		return mapEntityPageToDTO(tags);
 		
-		if (tags.getNumber() + 1 < tags.getTotalPages()) {
+	}
+	
+	@Override
+	public PaginationDTO<TagDTO> searchTags(SearchRequestDTO searchDto) {
+		Pageable sortedByCreatedAt = null;
+		if (searchDto == null || searchDto.getPage() == null || searchDto.getSize() == null) {
+			sortedByCreatedAt = PageRequest.of(PageRequestDTO.DEFAULT_PAGE, PageRequestDTO.DEFAULT_SIZE, Sort.Direction.DESC, "createdAt");
+		} else {
+			if (searchDto.getSize() > PageRequestDTO.MAX_SIZE) {
+				sortedByCreatedAt = PageRequest.of(searchDto.getPage(), PageRequestDTO.MAX_SIZE, Sort.Direction.DESC, "createdAt");
+			} else {
+				sortedByCreatedAt = PageRequest.of(searchDto.getPage(), searchDto.getSize(), Sort.Direction.DESC, "createdAt");
+			}
+		}
+		
+		if (searchDto.getSearchTerm() != null && !searchDto.getSearchTerm().isBlank()) {
+			Page<Tag> tags = tagRepository.findByContentFlatContainingIgnoreCaseOrPostTitleContainingIgnoreCase(searchDto.getSearchTerm(), searchDto.getSearchTerm(), sortedByCreatedAt);
+			return mapEntityPageToDTO(tags);
+		} else {
+			Page<Tag> tags = tagRepository.findAll(sortedByCreatedAt);
+			return mapEntityPageToDTO(tags);
+		}
+	}
+	
+	private PaginationDTO<TagDTO> mapEntityPageToDTO(Page<Tag> page) {
+		List<TagDTO> dtos = page.stream()
+				.map(tagMapper::toDto)
+				.collect(Collectors.toList());
+		if (page.getNumber() + 1 < page.getTotalPages()) {
 			return PaginationDTO.<TagDTO>builder()
-					.page(tags.getNumber())
-					.pageSize(tags.getSize())
-					.totalSize(tags.getTotalElements())
-					.nextPage(tags.getNumber() + 1)
-					.data(tagDtos)
+					.page(page.getNumber())
+					.pageSize(page.getSize())
+					.totalSize(page.getTotalElements())
+					.nextPage(page.getNumber() + 1)
+					.data(dtos)
 					.build();
 		} else {
 			return PaginationDTO.<TagDTO>builder()
-					.page(tags.getNumber())
-					.pageSize(tags.getSize())
-					.totalSize(tags.getTotalElements())
-					.data(tagDtos)
+					.page(page.getNumber())
+					.pageSize(page.getSize())
+					.totalSize(page.getTotalElements())
+					.data(dtos)
 					.build();
 		}
 	}
@@ -119,9 +149,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	@Override
 	public List<TagDTO> getTagsByUserId(String userId) {
 		List<Tag> tags = queryHelper.queryByFieldAndSort("userId", userId, Sort.Direction.DESC, "createdAt", Tag.class);
-		List<TagDTO> tagsDto = tags.stream()
-				.map(this::convertTagToDto)
-				.collect(Collectors.toList());
 		List<TagDTO> tagDtos = tags.stream()
 				.map(this::convertTagToDto)
 				.collect(Collectors.toList());
@@ -155,17 +182,43 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		
 		// Appends text fragments to construct post intro
 		StringBuilder postIntroSb = new StringBuilder();
+		StringBuilder postContentFlatSb = new StringBuilder();
 		
 		for (ContentBlock block: post.getContent()) {
 			if (block.getType().equals(BlockType.PARAGRAPH.getType())) {
 				for (TextFragment textFrag: block.getTextContent()) {
-					postIntroSb.append(" ");
-					postIntroSb.append(textFrag.getText());
+					if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
+						postIntroSb.append(" ");
+						postIntroSb.append(textFrag.getText().strip());
+						postContentFlatSb.append(" ");
+						postContentFlatSb.append(textFrag.getText().strip());
+					}
 				}
+			} else if (block.getType().equals(BlockType.HEADING_ONE.getType()) 
+					|| block.getType().equals(BlockType.HEADING_TWO.getType()) 
+					|| block.getType().equals(BlockType.BLOCK_QUOTE.getType())
+					|| block.getType().equals(BlockType.LINK.getType())) {
+				for (TextFragment textFrag: block.getTextContent()) {
+					if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
+						postContentFlatSb.append(" ");
+						postContentFlatSb.append(textFrag.getText().strip());
+					}
+				}
+			} else if (block.getType().equals(BlockType.NUMBERED_LIST.getType()) || block.getType().equals(BlockType.BULLETED_LIST.getType())) {
+				String listBlockAsString = block.getChildNodes().stream()
+					.map(child -> child.getTextContent().stream()
+							.filter(textFrag -> textFrag.getText() != null && !textFrag.getText().isBlank())
+							.map(TextFragment::getText)
+							.map(String::strip)
+							.collect(Collectors.joining(" ")))
+					.collect(Collectors.joining(" "));
+				postContentFlatSb.append(" ");
+				postContentFlatSb.append(listBlockAsString);
 			}
 		}
 		
 		post.setId(sequenceGenService.generateSequence(BlogPost.ID_SEQUENCE));
+		post.setUuid(UuidUtils.generateType4UUID().toString());
 		
 		BlogPost newPost = blogPostRepository.save(post);
 		
@@ -173,7 +226,8 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		tag.setId(newPost.getId());
 		tag.setPostId(newPost.getId());
 		tag.setPostTitle(post.getTitle());
-		tag.setPostIntro(postIntroSb.toString());
+		tag.setPostIntro(postIntroSb.toString().strip());
+		tag.setContentFlat(postContentFlatSb.toString().strip());
 		tag.setUserId(newPost.getUserId());
 		
 		if (newPost.getAttachments().size() > 0) {
@@ -200,66 +254,106 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 	
 	@Override
-	public BlogPostDTO update(Long id, BlogPostDTO postDto) {
-		Optional<BlogPost> postToUpdateOpt = blogPostRepository.findById(id);
-		if (postToUpdateOpt.isPresent()) {
-			BlogPost postToUpdate = postToUpdateOpt.get();
-			postToUpdate.setPersisted(true);
-			postToUpdate.setTitle(postDto.getTitle());
-			
-			List<ContentBlock> content = postDto.getContent().stream()
-					.map(contentBlockDto -> mapper.convertValue(contentBlockDto, ContentBlock.class))
-					.collect(Collectors.toList());
-			List<Attachment> attachments = postDto.getAttachments().stream()
-					.map(attachmentDto -> convertAttachmentDtoToModel(attachmentDto))
-					.collect(Collectors.toList());
-			postToUpdate.setContent(content);
-			postToUpdate.setAttachments(attachments);
-			
-			BlogPost saved = blogPostRepository.save(postToUpdate);
-			
-			if (saved != null) {
-				
-				Optional<Tag> tagOpt = tagRepository.findById(saved.getId());
-				if (tagOpt.isPresent()) {
-					// Appends text fragments to construct post intro
-					StringBuilder postIntroSb = new StringBuilder();
-					for (ContentBlock block: saved.getContent()) {
-						if (block.getType().equals(BlockType.PARAGRAPH.getType())) {
-							for (TextFragment textFrag: block.getTextContent()) {
-								postIntroSb.append(" ");
-								postIntroSb.append(textFrag.getText());
-							}
+	public List<TagDTO> initFlatContent() {
+		
+		List<BlogPost> posts = blogPostRepository.findAll();
+		posts.forEach(post -> {
+			StringBuilder postIntroSb = new StringBuilder();
+			StringBuilder postContentFlatSb = new StringBuilder();
+			for (ContentBlock block: post.getContent()) {
+				if (block.getType().equals(BlockType.PARAGRAPH.getType())) {
+					for (TextFragment textFrag: block.getTextContent()) {
+						if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
+							postIntroSb.append(" ");
+							postIntroSb.append(textFrag.getText().strip());
+							postContentFlatSb.append(" ");
+							postContentFlatSb.append(textFrag.getText().strip());
 						}
 					}
-					
-					Tag tag = tagOpt.get();
-					tag.setPersisted(true);
-					tag.setPostTitle(saved.getTitle());
-					tag.setPostIntro(postIntroSb.toString());
-					
-					if (saved.getAttachments().size() > 0) {
-						tag.setThumbnail(saved.getAttachments().get(0));			
-					} else {
-						MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
-								MediaQueryDTO.builder()
-									.fileName(PLACEHOLDER_IMG)
-									.mediaCategory(MediaCategory.BLOG)
-									.build());
-						tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
+				} else if (block.getType().equals(BlockType.HEADING_ONE.getType()) 
+						|| block.getType().equals(BlockType.HEADING_TWO.getType()) 
+						|| block.getType().equals(BlockType.BLOCK_QUOTE.getType())
+						|| block.getType().equals(BlockType.LINK.getType())) {
+					for (TextFragment textFrag: block.getTextContent()) {
+						if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
+							postContentFlatSb.append(" ");
+							postContentFlatSb.append(textFrag.getText().strip());
+						}
 					}
-					
-					
-					Tag savedTag = tagRepository.save(tag);
-					TagDTO tagDto = convertTagToDto(savedTag);
-					BlogPostDTO newPostDto = convertBlogPostToDto(saved);
-					newPostDto.setTag(tagDto);
-					return newPostDto;
+				} else if (block.getType().equals(BlockType.NUMBERED_LIST.getType()) || block.getType().equals(BlockType.BULLETED_LIST.getType())) {
+					String listBlockAsString = block.getChildNodes().stream()
+						.map(child -> child.getTextContent().stream()
+								.filter(textFrag -> textFrag.getText() != null && !textFrag.getText().isBlank())
+								.map(TextFragment::getText)
+								.map(String::strip)
+								.collect(Collectors.joining(" ")))
+						.collect(Collectors.joining(" "));
+					postContentFlatSb.append(" ");
+					postContentFlatSb.append(listBlockAsString);
+				}
+			}
+			
+			Tag tag = tagRepository.findByPostId(post.getId()).stream().findFirst().get();
+			tag.setPostIntro(postIntroSb.toString().strip());
+			tag.setContentFlat(postContentFlatSb.toString().strip());
+			tagRepository.save(tag);
+		});
+		return StreamSupport.stream(tagRepository.findAll().spliterator(), false).map(tagMapper::toDto).collect(Collectors.toList());
+	}
+	
+	@Override
+	public BlogPostDTO update(Long id, BlogPostDTO postDto) {
+		BlogPost postToUpdate = blogPostRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("blog-post-not-found", "Blog post not found with id: " + id));
+		postToUpdate.setPersisted(true);
+		postToUpdate.setTitle(postDto.getTitle());
+		
+		List<ContentBlock> content = postDto.getContent().stream()
+				.map(contentBlockDto -> mapper.convertValue(contentBlockDto, ContentBlock.class))
+				.collect(Collectors.toList());
+		List<Attachment> attachments = postDto.getAttachments().stream()
+				.map(attachmentDto -> convertAttachmentDtoToModel(attachmentDto))
+				.collect(Collectors.toList());
+		postToUpdate.setContent(content);
+		postToUpdate.setAttachments(attachments);
+		
+		BlogPost saved = blogPostRepository.save(postToUpdate);
+		
+		Tag tag = tagRepository.findById(saved.getId())
+				.orElseThrow(() -> new EntityNotFoundException("tag-not-found", "Tag not found with id: " + saved.getId()));
+		
+		// Appends text fragments to construct post intro
+		StringBuilder postIntroSb = new StringBuilder();
+		for (ContentBlock block: saved.getContent()) {
+			if (block.getType().equals(BlockType.PARAGRAPH.getType())) {
+				for (TextFragment textFrag: block.getTextContent()) {
+					postIntroSb.append(" ");
+					postIntroSb.append(textFrag.getText());
 				}
 			}
 		}
 		
-		return null;
+		tag.setPersisted(true);
+		tag.setPostTitle(saved.getTitle());
+		tag.setPostIntro(postIntroSb.toString());
+		
+		if (saved.getAttachments().size() > 0) {
+			tag.setThumbnail(saved.getAttachments().get(0));			
+		} else {
+			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
+					MediaQueryDTO.builder()
+						.fileName(PLACEHOLDER_IMG)
+						.mediaCategory(MediaCategory.BLOG)
+						.build());
+			tag.setThumbnail(new Attachment(placeholderImg.getName(), placeholderImg.getSrc()));
+		}
+		
+		
+		Tag savedTag = tagRepository.save(tag);
+		TagDTO tagDto = convertTagToDto(savedTag);
+		BlogPostDTO newPostDto = convertBlogPostToDto(saved);
+		newPostDto.setTag(tagDto);
+		return newPostDto;
 	}
 
 	@Override

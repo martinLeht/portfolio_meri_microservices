@@ -6,8 +6,7 @@ import java.util.UUID;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +24,9 @@ public class CommentDTO {
 	@NotNull
 	private UUID userId;
 	
+	@NotEmpty
+	private String username;
+	
 	@NotNull
 	private UUID postId;
 	
@@ -33,10 +35,10 @@ public class CommentDTO {
 	
 	private boolean verified;
 	
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdAt;
 	
-	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime updatedAt;
 
 }

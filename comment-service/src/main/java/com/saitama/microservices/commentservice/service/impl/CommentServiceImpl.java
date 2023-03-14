@@ -16,10 +16,10 @@ import com.saitama.microservices.commentservice.entity.Comment;
 import com.saitama.microservices.commentservice.mapper.CommentMapper;
 import com.saitama.microservices.commentservice.repository.CommentRepository;
 import com.saitama.microservices.commentservice.service.ICommentService;
+import com.saitama.microservices.commentservice.util.QueryUtils;
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
 import com.saitama.microservices.commonlib.exception.EntityNotFoundException;
-import com.saitama.microservices.commonlib.util.QueryUtils;
 
 
 @Service
@@ -111,6 +111,7 @@ public class CommentServiceImpl implements ICommentService {
 	public CommentDTO create(CommentDTO commentDto) {
 		
 		Comment comment = commentMapper.fromDto(commentDto);
+		comment.setVerified(true);
 		
 		UUID uuid = UUID.randomUUID();
 		List<Comment> existingComments = commentRepository.findByUuid(uuid);

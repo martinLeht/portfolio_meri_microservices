@@ -3,18 +3,17 @@ package com.saitama.microservices.authenticationservice.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +24,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties(value = { "verificationToken" })
 public class TempUser {
 	
 	@Id
@@ -43,6 +43,15 @@ public class TempUser {
 	@Column(nullable = false, updatable = false, unique = true)
 	private UUID uuid;
 	
+	@Column(nullable = false, updatable = false, unique = true)
+	private UUID accessUuid;
+	
+	@Column(name = "keycloak_user_id", nullable = false, unique = true)
+	private String keycloakUserId;
+	
+	@Column(name = "verification_token", unique = true)
+	private UUID verificationToken;
+	
 	@Column
 	private String username;
 	
@@ -55,6 +64,9 @@ public class TempUser {
 	@Column
 	private boolean locked;
 	
+	@Column(name = "require_verification_on_every_access")
+	private boolean requireVerificationOnEveryAccess;
+	
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private LocalDateTime createdAt;
@@ -62,8 +74,5 @@ public class TempUser {
 	@Column(name = "updated_at")
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
-	
-	@OneToOne(cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
-	private AccessKey accessKey;
 
 }

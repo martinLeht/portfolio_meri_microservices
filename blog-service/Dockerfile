@@ -12,10 +12,10 @@
 #
 FROM adoptopenjdk:11-jre-hotspot as builder
 # Maven build JAR name
-ARG JAR_FILE=target/blog-service-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=target/blog-service-0.0.1-SNAPSHOT-exec.jar
 # cd /microservices/blog-service/app
 WORKDIR /microservices/blog-service/app
-# cp target/blog-service-0.0.1-SNAPSHOT.jar --> /microservices/blog-service/app/blog-service.jar
+# cp target/blog-service-0.0.1-SNAPSHOT-exec.jar --> /microservices/blog-service/app/blog-service.jar
 COPY ${JAR_FILE} blog-service.jar
 # Run java -jar /microservices/blog-service/app/blog-service.jar
 ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-jar", "blog-service.jar"]

@@ -19,9 +19,11 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.saitama.microservices.portfoliodataservice.constant.ExperienceType;
 
 @Entity
+@JsonIgnoreProperties(value = { "id" })
 public class Experience {
 
 	@Id

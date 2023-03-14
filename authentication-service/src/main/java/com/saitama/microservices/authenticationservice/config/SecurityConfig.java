@@ -23,13 +23,12 @@ public class SecurityConfig {
 	/*
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-				.antMatchers("/**").permitAll()
-			.and()
-			.csrf((csrf) -> csrf.disable())
-			.httpBasic((httpBasic) -> httpBasic.disable())
-			.formLogin((formLogin) -> formLogin.disable());
-		return http.build();
+		return http
+				.authorizeRequests(auth -> auth.antMatchers("/**").permitAll())
+				.csrf(csrf -> csrf.disable())
+				.httpBasic(httpBasic -> httpBasic.disable())
+				.formLogin(formLogin -> formLogin.disable())
+				.build();
     }
 	
 	@Bean
@@ -37,5 +36,6 @@ public class SecurityConfig {
 	    return (web) -> web.ignoring().antMatchers("/**");
 	}
 	*/
+	
 
 }

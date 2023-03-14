@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saitama.microservices.commentservice.dto.CommentDTO;
@@ -30,17 +31,24 @@ public class CommentController {
 		this.commentService = commentService;
 	}
 	
-	
 	@GetMapping("/post/{postId}")
 	public PaginationDTO<CommentDTO> getPostComments(@PathVariable String postId, 
-												 	 @RequestBody(required = false) PageRequestDTO pageDto) {		
+													 @RequestParam Integer page, @RequestParam Integer size) {
+		PageRequestDTO pageDto = PageRequestDTO.builder()
+				.page(page != null ? page : PageRequestDTO.DEFAULT_PAGE)
+				.size(size != null ? size : PageRequestDTO.DEFAULT_SIZE)
+				.build();		
 		return commentService.getPaginatedPostComments(UUID.fromString(postId), pageDto);
 	}
 	
 	
 	@GetMapping("/{parentId}/thread")
 	public PaginationDTO<CommentDTO> getThreadComments(@PathVariable String parentId,
-													   @RequestBody(required = false) PageRequestDTO pageDto) {		
+													   @RequestParam Integer page, @RequestParam Integer size) {
+		PageRequestDTO pageDto = PageRequestDTO.builder()
+				.page(page != null ? page : PageRequestDTO.DEFAULT_PAGE)
+				.size(size != null ? size : PageRequestDTO.DEFAULT_SIZE)
+				.build();				
 		return commentService.getPaginatedThreadComments(UUID.fromString(parentId), pageDto);
 	}
 	
@@ -57,7 +65,7 @@ public class CommentController {
 	}
 	
 	
-	@PostMapping("/{parentId}/thread/")
+	@PostMapping("/{parentId}/thread")
 	public CommentDTO createThreadComment(@PathVariable String parentId, @RequestBody CommentDTO commentDto) {		
 		return commentService.create(commentDto);
 	}

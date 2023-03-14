@@ -9,5 +9,11 @@ import com.saitama.microservices.authenticationservice.entity.TempUser;
 
 public interface TempUserRepository extends JpaRepository<TempUser, Long> {
 
+	List<TempUser> findByAccessUuid(UUID uuid);
+	
+	List<TempUser> findByVerificationToken(UUID verificationToken);
+	
 	List<TempUser> findByUuid(UUID uuid);
+	
+	List<TempUser> findByUsername(String username);
 }

@@ -1,5 +1,6 @@
 package com.saitama.microservices.commonlib.util;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +14,19 @@ import java.util.UUID;
 public final class UuidUtils {
 
     private UuidUtils() {}
+    
+    
+	/**
+	 * Type 3 UUID Generation
+	 * @throws UnsupportedEncodingException 
+	 */
+    public static UUID generateType3UUID(String namespace, String name) throws UnsupportedEncodingException {
+    	byte[] nameSpaceBytes = bytesFromUUID(namespace);
+    	byte[] nameBytes = name.getBytes("UTF-8");
+    	byte[] result = joinBytes(nameSpaceBytes, nameBytes);
+
+    	return UUID.nameUUIDFromBytes(result);
+    }
 
     /**
      * Type 4 UUID Generation
@@ -63,7 +77,7 @@ public final class UuidUtils {
         final String normalizedUUIDHexString = uuidHexString.replace("-", "");
 
         assert normalizedUUIDHexString.length() == 32;
-
+        
         final byte[] bytes = new byte[16];
         for (int i = 0; i < 16; i++) {
             final byte b = hexToByte(normalizedUUIDHexString.substring(i * 2, i * 2 + 2));
