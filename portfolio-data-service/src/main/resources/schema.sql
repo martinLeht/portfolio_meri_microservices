@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS comment (
 	CONSTRAINT fk_comment_parent FOREIGN KEY (parent_id) REFERENCES comment(id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS comment_seq start 1 increment 3;
 
 CREATE TABLE IF NOT EXISTS experience (
 	id bigint NOT NULL,
@@ -30,6 +31,7 @@ CREATE TABLE IF NOT EXISTS experience (
 	PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE IF NOT EXISTS experience_seq start 1 increment 3;
 
 CREATE TABLE IF NOT EXISTS media (
 	id bigint NOT NULL, 
