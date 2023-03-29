@@ -1,4 +1,4 @@
-package com.saitama.microservices.blogservice.proxy;
+package com.saitama.microservices.blogservice.client;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import com.saitama.microservices.commonlib.dto.MediaQueryDTO;
 
 
 @FeignClient(name = "storage-service")
-public interface StorageServiceProxy {
+public interface StorageServiceClient {
 	
 	@PostMapping("/storage/get")
     public MediaFileDTO getFileUrl(@RequestBody MediaQueryDTO mediaQueryDto);

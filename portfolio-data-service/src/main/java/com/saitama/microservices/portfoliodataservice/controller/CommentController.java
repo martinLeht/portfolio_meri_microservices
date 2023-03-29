@@ -79,8 +79,13 @@ public class CommentController {
 	
 
 	@DeleteMapping("/{id}")
-	public void deleteComment(@PathVariable String id) {		
-		commentService.delete(UUID.fromString(id));
+	public void deleteComment(@PathVariable UUID id) {		
+		commentService.delete(id);
+	}
+	
+	@DeleteMapping("/post/{postId}")
+	public void deleteCommentByPostId(@PathVariable UUID postId) {		
+		commentService.deleteByPostId(postId);
 	}
 	
 }

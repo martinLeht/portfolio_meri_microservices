@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.saitama.microservices.blogservice.client.PortfolioDataServiceClient;
+import com.saitama.microservices.blogservice.client.StorageServiceClient;
 import com.saitama.microservices.blogservice.dto.AttachmentDTO;
 import com.saitama.microservices.blogservice.dto.BlogPostDTO;
 import com.saitama.microservices.blogservice.dto.TagDTO;
@@ -23,7 +25,6 @@ import com.saitama.microservices.blogservice.model.BlogPost;
 import com.saitama.microservices.blogservice.model.ContentBlock;
 import com.saitama.microservices.blogservice.model.Tag;
 import com.saitama.microservices.blogservice.model.TextFragment;
-import com.saitama.microservices.blogservice.proxy.StorageServiceProxy;
 import com.saitama.microservices.blogservice.query.MongoQueryHelper;
 import com.saitama.microservices.blogservice.repository.BlogPostRepository;
 import com.saitama.microservices.blogservice.repository.TagRepository;
@@ -37,7 +38,6 @@ import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
 import com.saitama.microservices.commonlib.dto.SearchRequestDTO;
 import com.saitama.microservices.commonlib.exception.EntityNotFoundException;
-import com.saitama.microservices.commonlib.util.UuidUtils;
 
 @Service
 public class BlogPostServiceImpl implements IBlogPostService {
@@ -45,7 +45,8 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	private static final String PLACEHOLDER_IMG = "image-placeholder.png";
 	
 	private final MongoQueryHelper queryHelper;
-	private final StorageServiceProxy storageServiceProxy;
+	private final StorageServiceClient storageServiceClient;
+	private final PortfolioDataServiceClient portfolioDataServiceClient;
 	private final BlogPostRepository blogPostRepository;
 	private final TagRepository tagRepository;
 	private final TagMapper tagMapper;
@@ -53,10 +54,17 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	
 	
 	@Autowired
-	public BlogPostServiceImpl(MongoQueryHelper queryHelper, StorageServiceProxy storageServiceProxy, BlogPostRepository blogPostRepository,
-			TagRepository tagRepository, TagMapper tagMapper, ObjectMapper mapper) {
+	public BlogPostServiceImpl(
+			MongoQueryHelper queryHelper, 
+			StorageServiceClient storageServiceClient, 
+			PortfolioDataServiceClient portfolioDataServiceClient,
+			BlogPostRepository blogPostRepository,
+			TagRepository tagRepository, 
+			TagMapper tagMapper, 
+			ObjectMapper mapper) {
 		this.queryHelper = queryHelper;
-		this.storageServiceProxy = storageServiceProxy;
+		this.storageServiceClient = storageServiceClient;
+		this.portfolioDataServiceClient = portfolioDataServiceClient;
 		this.blogPostRepository = blogPostRepository;
 		this.tagRepository = tagRepository;
 		this.tagMapper = tagMapper;
@@ -197,7 +205,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			Attachment thumbnail = newPost.getAttachments().get(0);
 			tag.setThumbnail(thumbnail);
 		} else {
-			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
+			MediaFileDTO placeholderImg = storageServiceClient.getFileUrl(
 					MediaQueryDTO.builder()
 						.fileName(PLACEHOLDER_IMG)
 						.mediaCategory(MediaCategory.BLOG)
@@ -254,7 +262,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		if (saved.getAttachments().size() > 0) {
 			tag.setThumbnail(saved.getAttachments().get(0));			
 		} else {
-			MediaFileDTO placeholderImg = storageServiceProxy.getFileUrl(
+			MediaFileDTO placeholderImg = storageServiceClient.getFileUrl(
 					MediaQueryDTO.builder()
 						.fileName(PLACEHOLDER_IMG)
 						.mediaCategory(MediaCategory.BLOG)
@@ -275,28 +283,37 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		Optional<BlogPost> postOpt = blogPostRepository.findById(id);
 		if (postOpt.isPresent()) {
 			BlogPost post = postOpt.get();
-			// Gather all blocks that contain an attached file
-			List<ContentBlock> attachmentBlocks = post.getContent()
-					.stream()
-					.filter(block -> block.getType().equals(BlockType.IMAGE.getType()))
-					.collect(Collectors.toList());
-			List<String> fileNames = new ArrayList<>();
-			for (int i = 0; i < attachmentBlocks.size(); i++) {
-				fileNames.add(attachmentBlocks.get(i).getAttachment().getName());
-			}
-			// Remove all files attached to post from storage before deleting post
-			if (fileNames.size() > 0) {
-				storageServiceProxy.deleteFiles(
-						MediaListQueryDTO.builder()
-							.fileNames(fileNames)
-							.mediaCategory(MediaCategory.BLOG)
-							.build());
-			}
+			deleteAllAttachmentsFromPost(post);
+			deleteAllCommentsByPostId(post.getId());
 			
 			blogPostRepository.delete(post);
 			Optional<Tag> tagOpt = tagRepository.findById(id);
 			tagOpt.ifPresent(tag -> tagRepository.delete(tag));
 		}
+	}
+	
+	private void deleteAllAttachmentsFromPost(BlogPost post) {
+		// Gather all blocks that contain an attached file
+		List<ContentBlock> attachmentBlocks = post.getContent()
+				.stream()
+				.filter(block -> block.getType().equals(BlockType.IMAGE.getType()))
+				.collect(Collectors.toList());
+		List<String> fileNames = new ArrayList<>();
+		for (int i = 0; i < attachmentBlocks.size(); i++) {
+			fileNames.add(attachmentBlocks.get(i).getAttachment().getName());
+		}
+		// Remove all files attached to post from storage before deleting post
+		if (fileNames.size() > 0) {
+			storageServiceClient.deleteFiles(
+					MediaListQueryDTO.builder()
+						.fileNames(fileNames)
+						.mediaCategory(MediaCategory.BLOG)
+						.build());
+		}
+	}
+	
+	private void deleteAllCommentsByPostId(UUID postId) {
+		portfolioDataServiceClient.deleteCommentsByPostId(postId);
 	}
 	
 	

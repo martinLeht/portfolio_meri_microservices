@@ -12,4 +12,6 @@ public interface ICommentService extends IBaseReadWriteService<CommentDTO, UUID>
 	PaginationDTO<CommentDTO> getPaginatedPostComments(UUID postId, PageRequestDTO pageDto);
 	
 	PaginationDTO<CommentDTO> getPaginatedThreadComments(UUID parentId, PageRequestDTO pageDto);
+	
+	void deleteByPostId(UUID postId);
 }

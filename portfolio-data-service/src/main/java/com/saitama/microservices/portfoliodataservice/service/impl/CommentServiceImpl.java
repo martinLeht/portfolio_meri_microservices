@@ -148,4 +148,14 @@ public class CommentServiceImpl implements ICommentService {
 		
 	}
 	
+	@Override
+	public void deleteByPostId(UUID postId) {
+		List<Comment> comments = this.commentRepository.findByPostId(postId);
+		if (comments.size() < 1) {
+			throw new EntityNotFoundException("comments-not-found", "Comments not found with postId: " + postId);
+		}
+		commentRepository.deleteAll(comments);
+		
+	}
+	
 }
