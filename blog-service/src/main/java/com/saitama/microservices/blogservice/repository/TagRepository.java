@@ -1,7 +1,7 @@
 package com.saitama.microservices.blogservice.repository;
 
-
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 import com.saitama.microservices.blogservice.model.Tag;
 
 @Repository
-public interface TagRepository extends PagingAndSortingRepository<Tag, Long> {
+public interface TagRepository extends PagingAndSortingRepository<Tag, UUID> {
 	
-	List<Tag> findByPostId(Long postId);
 	Page<Tag> findByContentFlatContainingIgnoreCaseOrPostTitleContainingIgnoreCase(String firstText, String secondText, Pageable pageable);
+	Optional<Tag> findByPostTitle(String postTitle);
 }

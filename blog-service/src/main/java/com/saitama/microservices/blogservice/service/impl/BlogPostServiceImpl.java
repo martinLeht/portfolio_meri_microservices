@@ -3,8 +3,8 @@ package com.saitama.microservices.blogservice.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,7 +29,6 @@ import com.saitama.microservices.blogservice.repository.BlogPostRepository;
 import com.saitama.microservices.blogservice.repository.TagRepository;
 import com.saitama.microservices.blogservice.resource.BlockType;
 import com.saitama.microservices.blogservice.service.IBlogPostService;
-import com.saitama.microservices.blogservice.service.ISequenceGeneratorService;
 import com.saitama.microservices.commonlib.constant.MediaCategory;
 import com.saitama.microservices.commonlib.dto.MediaFileDTO;
 import com.saitama.microservices.commonlib.dto.MediaListQueryDTO;
@@ -48,7 +47,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	private final MongoQueryHelper queryHelper;
 	private final StorageServiceProxy storageServiceProxy;
 	private final BlogPostRepository blogPostRepository;
-	private final ISequenceGeneratorService sequenceGenService;
 	private final TagRepository tagRepository;
 	private final TagMapper tagMapper;
 	private final ObjectMapper mapper;
@@ -56,11 +54,10 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	
 	@Autowired
 	public BlogPostServiceImpl(MongoQueryHelper queryHelper, StorageServiceProxy storageServiceProxy, BlogPostRepository blogPostRepository,
-			ISequenceGeneratorService sequenceGenService, TagRepository tagRepository, TagMapper tagMapper, ObjectMapper mapper) {
+			TagRepository tagRepository, TagMapper tagMapper, ObjectMapper mapper) {
 		this.queryHelper = queryHelper;
 		this.storageServiceProxy = storageServiceProxy;
 		this.blogPostRepository = blogPostRepository;
-		this.sequenceGenService = sequenceGenService;
 		this.tagRepository = tagRepository;
 		this.tagMapper = tagMapper;
 		this.mapper = mapper;
@@ -76,7 +73,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 
 	@Override
-	public BlogPostDTO getById(Long id) {
+	public BlogPostDTO getById(UUID id) {
 		BlogPost blogPost = blogPostRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("blog-post-not-found", "Blog post not found with id: " + id));	
 		return convertBlogPostToDto(blogPost);
@@ -147,36 +144,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 	
 	@Override
-	public List<TagDTO> getTagsByUserId(String userId) {
-		List<Tag> tags = queryHelper.queryByFieldAndSort("userId", userId, Sort.Direction.DESC, "createdAt", Tag.class);
-		List<TagDTO> tagDtos = tags.stream()
-				.map(this::convertTagToDto)
-				.collect(Collectors.toList());
-		
-		return tagDtos;
-	}
-	
-	@Override
-	public List<TagDTO> getLatestTagsByUserId(String userId) {
-		List<Tag> tags = queryHelper.queryByFieldAndSort("userId", userId, Sort.Direction.DESC, "createdAt", Tag.class);
-		List<TagDTO> tagDtos = tags.stream()
-				.map(this::convertTagToDto)
-				.collect(Collectors.toList());
-		return tagDtos;
-	}
-
-
-	@Override
-	public TagDTO getTagById(Long id) {
-		Optional<Tag> tagOpt = tagRepository.findById(id);
-		if (tagOpt.isPresent()) {
-			return convertTagToDto(tagOpt.get());
-		}
-		return null;
-	}
-	
-	
-	@Override
 	public BlogPostDTO create(BlogPostDTO postDto) {
 		BlogPost post = mapper.convertValue(postDto, BlogPost.class);
 		
@@ -217,14 +184,10 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			}
 		}
 		
-		post.setId(sequenceGenService.generateSequence(BlogPost.ID_SEQUENCE));
-		post.setUuid(UuidUtils.generateType4UUID().toString());
-		
 		BlogPost newPost = blogPostRepository.save(post);
 		
 		Tag tag = new Tag();
 		tag.setId(newPost.getId());
-		tag.setPostId(newPost.getId());
 		tag.setPostTitle(post.getTitle());
 		tag.setPostIntro(postIntroSb.toString().strip());
 		tag.setContentFlat(postContentFlatSb.toString().strip());
@@ -253,59 +216,11 @@ public class BlogPostServiceImpl implements IBlogPostService {
 		return null;
 	}
 	
-	@Override
-	public List<TagDTO> initFlatContent() {
-		
-		List<BlogPost> posts = blogPostRepository.findAll();
-		posts.forEach(post -> {
-			StringBuilder postIntroSb = new StringBuilder();
-			StringBuilder postContentFlatSb = new StringBuilder();
-			for (ContentBlock block: post.getContent()) {
-				if (block.getType().equals(BlockType.PARAGRAPH.getType())) {
-					for (TextFragment textFrag: block.getTextContent()) {
-						if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
-							postIntroSb.append(" ");
-							postIntroSb.append(textFrag.getText().strip());
-							postContentFlatSb.append(" ");
-							postContentFlatSb.append(textFrag.getText().strip());
-						}
-					}
-				} else if (block.getType().equals(BlockType.HEADING_ONE.getType()) 
-						|| block.getType().equals(BlockType.HEADING_TWO.getType()) 
-						|| block.getType().equals(BlockType.BLOCK_QUOTE.getType())
-						|| block.getType().equals(BlockType.LINK.getType())) {
-					for (TextFragment textFrag: block.getTextContent()) {
-						if (textFrag.getText() != null && !textFrag.getText().isBlank()) {
-							postContentFlatSb.append(" ");
-							postContentFlatSb.append(textFrag.getText().strip());
-						}
-					}
-				} else if (block.getType().equals(BlockType.NUMBERED_LIST.getType()) || block.getType().equals(BlockType.BULLETED_LIST.getType())) {
-					String listBlockAsString = block.getChildNodes().stream()
-						.map(child -> child.getTextContent().stream()
-								.filter(textFrag -> textFrag.getText() != null && !textFrag.getText().isBlank())
-								.map(TextFragment::getText)
-								.map(String::strip)
-								.collect(Collectors.joining(" ")))
-						.collect(Collectors.joining(" "));
-					postContentFlatSb.append(" ");
-					postContentFlatSb.append(listBlockAsString);
-				}
-			}
-			
-			Tag tag = tagRepository.findByPostId(post.getId()).stream().findFirst().get();
-			tag.setPostIntro(postIntroSb.toString().strip());
-			tag.setContentFlat(postContentFlatSb.toString().strip());
-			tagRepository.save(tag);
-		});
-		return StreamSupport.stream(tagRepository.findAll().spliterator(), false).map(tagMapper::toDto).collect(Collectors.toList());
-	}
 	
 	@Override
-	public BlogPostDTO update(Long id, BlogPostDTO postDto) {
+	public BlogPostDTO update(UUID id, BlogPostDTO postDto) {
 		BlogPost postToUpdate = blogPostRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("blog-post-not-found", "Blog post not found with id: " + id));
-		postToUpdate.setPersisted(true);
 		postToUpdate.setTitle(postDto.getTitle());
 		
 		List<ContentBlock> content = postDto.getContent().stream()
@@ -333,7 +248,6 @@ public class BlogPostServiceImpl implements IBlogPostService {
 			}
 		}
 		
-		tag.setPersisted(true);
 		tag.setPostTitle(saved.getTitle());
 		tag.setPostIntro(postIntroSb.toString());
 		
@@ -357,7 +271,7 @@ public class BlogPostServiceImpl implements IBlogPostService {
 	}
 
 	@Override
-	public void delete(Long id) {
+	public void delete(UUID id) {
 		Optional<BlogPost> postOpt = blogPostRepository.findById(id);
 		if (postOpt.isPresent()) {
 			BlogPost post = postOpt.get();

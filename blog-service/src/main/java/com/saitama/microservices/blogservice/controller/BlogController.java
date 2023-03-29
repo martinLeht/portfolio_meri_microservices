@@ -1,8 +1,6 @@
 package com.saitama.microservices.blogservice.controller;
 
-
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,9 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.saitama.microservices.blogservice.dto.BlogPostDTO;
 import com.saitama.microservices.blogservice.dto.TagDTO;
-import com.saitama.microservices.blogservice.model.ContentBlock;
-import com.saitama.microservices.blogservice.model.TextFragment;
-import com.saitama.microservices.blogservice.resource.BlockType;
 import com.saitama.microservices.blogservice.service.IBlogPostService;
 import com.saitama.microservices.commonlib.dto.PageRequestDTO;
 import com.saitama.microservices.commonlib.dto.PaginationDTO;
@@ -42,7 +37,7 @@ public class BlogController {
 	
 	
 	@GetMapping("/{id}")
-	public BlogPostDTO getBlogPost(@PathVariable Long id) {
+	public BlogPostDTO getBlogPost(@PathVariable UUID id) {
 		return blogPostService.getById(id);
 	}
 	
@@ -86,19 +81,14 @@ public class BlogController {
 	
 	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public BlogPostDTO updateBlogPost(@PathVariable Long id, @RequestBody BlogPostDTO postDto) {
+	public BlogPostDTO updateBlogPost(@PathVariable UUID id, @RequestBody BlogPostDTO postDto) {
 		return blogPostService.update(id, postDto);
 	}
 	
 	
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public void deleteBlogPost(@PathVariable Long id) {
+	public void deleteBlogPost(@PathVariable UUID id) {
 		blogPostService.delete(id);
-	}
-	
-	@GetMapping("/flat")
-	public List<TagDTO> initFlatContent() {
-		return blogPostService.initFlatContent();
 	}
 }
