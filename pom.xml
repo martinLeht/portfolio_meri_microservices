@@ -25,15 +25,13 @@
     </properties>
 
     <modules>
-    	<module>discovery-service</module>
+    	<!-- <module>discovery-service</module> -->
         <module>common-lib</module>
         <module>api-gateway</module>
         <module>authentication-service</module>
         <module>blog-service</module>
-        <module>comment-service</module>
         <module>portfolio-data-service</module>
         <module>storage-service</module>
-        <module>email-service</module>
     </modules>
     
     <dependencyManagement>
