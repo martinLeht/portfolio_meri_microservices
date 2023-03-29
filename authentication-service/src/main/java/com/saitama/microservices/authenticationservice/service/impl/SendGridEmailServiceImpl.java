@@ -27,7 +27,7 @@ public class SendGridEmailServiceImpl implements IEmailService {
 	
 	@Value("${email.sendgrid.api.key}")
 	private String sendGridKey;
-	
+
 	
 	@Override
 	public boolean sendMail(MessageDTO message) {

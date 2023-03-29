@@ -13,3 +13,5 @@ CREATE TABLE IF NOT EXISTS temp_user (
 	verified_at TIMESTAMP, 
 	PRIMARY KEY (id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS temp_user_seq start 1 increment 3;

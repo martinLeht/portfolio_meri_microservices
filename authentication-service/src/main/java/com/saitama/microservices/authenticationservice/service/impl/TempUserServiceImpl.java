@@ -1,6 +1,5 @@
 package com.saitama.microservices.authenticationservice.service.impl;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.saitama.microservices.authenticationservice.dto.AccessRequestDTO;
 import com.saitama.microservices.authenticationservice.dto.JwtDTO;
 import com.saitama.microservices.authenticationservice.dto.LogoutDTO;
-import com.saitama.microservices.authenticationservice.dto.MessageDTO;
 import com.saitama.microservices.authenticationservice.dto.TempUserDTO;
 import com.saitama.microservices.authenticationservice.dto.TemporaryAccessGrantDTO;
 import com.saitama.microservices.authenticationservice.entity.TempUser;
@@ -25,12 +23,11 @@ import com.saitama.microservices.authenticationservice.exception.UserLockedExcep
 import com.saitama.microservices.authenticationservice.exception.UserNotVerifiedException;
 import com.saitama.microservices.authenticationservice.mapper.TempUserMapper;
 import com.saitama.microservices.authenticationservice.repository.TempUserRepository;
-import com.saitama.microservices.authenticationservice.service.IEmailService;
 import com.saitama.microservices.authenticationservice.service.IKeycloakService;
 import com.saitama.microservices.authenticationservice.service.ITempUserService;
+import com.saitama.microservices.authenticationservice.task.EmailVerificationTask;
 import com.saitama.microservices.commonlib.exception.CommonInternalException;
 import com.saitama.microservices.commonlib.exception.EntityNotFoundException;
-import com.saitama.microservices.commonlib.util.FileUtils;
 import com.saitama.microservices.commonlib.util.UuidUtils;
 
 
@@ -38,16 +35,11 @@ import com.saitama.microservices.commonlib.util.UuidUtils;
 public class TempUserServiceImpl implements ITempUserService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TempUserServiceImpl.class);
-	private static final String EMAIL_TEMPLATE = "templates/email_user_verification_template.html";
 	
 	private final IKeycloakService keycloakService;
 	private final TempUserRepository tempUserRepository;
 	private final TempUserMapper tempUserMapper;
-	private final IEmailService emailService;
-	
-	@Value("${user.verification.url}")
-	private String userVerificationUrl;
-	
+	private final EmailVerificationTask emailVerificationTask;
 
 	@Value("${encryption.salt}")
 	private String encryptionSalt;
@@ -57,11 +49,11 @@ public class TempUserServiceImpl implements ITempUserService {
 			IKeycloakService keycloakService,
 			TempUserRepository tempUserRepository,
 			TempUserMapper tempUserMapper, 
-			IEmailService emailService) {
+			EmailVerificationTask emailVerificationTask) {
 		this.keycloakService = keycloakService;
 		this.tempUserRepository = tempUserRepository;
 		this.tempUserMapper = tempUserMapper;
-		this.emailService = emailService;
+		this.emailVerificationTask = emailVerificationTask;
 	}
 
 	
@@ -242,34 +234,7 @@ public class TempUserServiceImpl implements ITempUserService {
 	}
 	
 	public void sendEmailVerification(AccessRequestDTO accessRequestDto, UUID userUuid, UUID verificationToken) {
-		
-		try {
-			String emailTemplateHtml = FileUtils.readFileAsString(EMAIL_TEMPLATE, getClass().getClassLoader());
-			emailTemplateHtml = emailTemplateHtml.replace("#TEXT_TOP#", "Verify temporary user access by clicking the link below: ");
-			emailTemplateHtml = emailTemplateHtml.replace("#TEXT_BOTTOM#", 
-					"\n\nAfter successful verification, you will be authorized to leave comments on the blog section."
-					+ "\nNOTE: Verified access will expire after 10 days of inactivity in the platform. "
-					+ "After expiration you will need to verify the access again.");
-			emailTemplateHtml = emailTemplateHtml.replace("#VERIFICATION_URL#", userVerificationUrl);
-			emailTemplateHtml = emailTemplateHtml.replace("#VERIFICATION_TOKEN#", verificationToken.toString());
-			emailTemplateHtml = emailTemplateHtml.replace("#USER_ID#", userUuid.toString());
-			emailTemplateHtml = emailTemplateHtml.replace("#CALLBACK_URL#", accessRequestDto.getCallbackUrl());
-			
-			MessageDTO verificationMessageDto = MessageDTO.builder()
-					.to(accessRequestDto.getEmail())
-					.subject("Temporary user verification - www.merijohanna.com")
-					.content(emailTemplateHtml)
-					.createdAt(LocalDateTime.now())
-					.build();
-			emailService.sendMail(verificationMessageDto);
-			
-		} catch (IOException e) {
-			LOG.error("Failed to send user verification email for temporary user id: {}", userUuid);
-			LOG.error(e.getLocalizedMessage());
-			throw new CommonInternalException(
-					"failed-to-send-verification-email", 
-					"Failed to send user verification email for temporary user id: " + userUuid);
-		}
+		emailVerificationTask.execute(accessRequestDto.getEmail(), accessRequestDto.getCallbackUrl(), userUuid, verificationToken);
 	}
 	
 	@Override
